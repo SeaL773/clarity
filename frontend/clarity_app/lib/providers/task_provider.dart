@@ -34,21 +34,24 @@ class TaskProvider extends ChangeNotifier {
 
     try {
       final result = await _api.process(text);
-      _tasks = result.tasks;
-      _insights = result.insights;
-      _totalEstimatedHours = result.totalEstimatedHours;
+      final newTasks = result.tasks;
 
       if (result.suggestedOrder.isNotEmpty) {
         final orderMap = <String, int>{};
         for (var i = 0; i < result.suggestedOrder.length; i++) {
           orderMap[result.suggestedOrder[i]] = i;
         }
-        _tasks.sort((a, b) {
+        newTasks.sort((a, b) {
           final aIdx = orderMap[a.id] ?? 999;
           final bIdx = orderMap[b.id] ?? 999;
           return aIdx.compareTo(bIdx);
         });
       }
+
+      // Append new tasks to existing ones instead of replacing
+      _tasks.addAll(newTasks);
+      _insights = result.insights;
+      _totalEstimatedHours += result.totalEstimatedHours;
     } catch (e) {
       _error = e.toString();
     }
