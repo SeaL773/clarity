@@ -56,7 +56,7 @@ class TaskProvider extends ChangeNotifier {
       _insights = result.insights;
       _totalEstimatedHours += result.totalEstimatedHours;
     } catch (e) {
-      _error = e.toString();
+      _error = 'Could not process. Please try again.';
     }
 
     _isLoading = false;
