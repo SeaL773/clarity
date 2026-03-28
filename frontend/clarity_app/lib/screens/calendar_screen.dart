@@ -346,8 +346,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
         _taskCache[entry.key] = entry.value;
       }
     } else if (!provider.isTestMode && _taskCache.values.any((v) => v.any((t) => t.id.startsWith('test-')))) {
-      // Exited dev mode — clear test data from cache
+      // Exited dev mode — clear test data from cache + selected tasks
       _taskCache.clear();
+      _selectedTasks = [];
     }
 
     // Always sync today's live tasks from provider into cache
