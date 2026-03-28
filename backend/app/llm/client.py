@@ -1,7 +1,8 @@
-"""LLM client wrapper — supports AWS Bedrock (primary) and OpenAI (fallback)."""
+"""LLM client wrapper — supports Kiro (primary), AWS Bedrock, and OpenAI (fallback)."""
 
 import json
 import os
+import uuid
 from pathlib import Path
 
 import boto3
@@ -19,11 +20,118 @@ PARSE_PROMPT = _load_prompt("parse")
 PLAN_PROMPT = _load_prompt("plan")
 SUMMARIZE_PROMPT = _load_prompt("summarize")
 
+# Kiro token path
+KIRO_TOKEN_PATH = Path.home() / ".aws" / "sso" / "cache" / "kiro-auth-token.json"
+
+# Kiro API config
+KIRO_ENDPOINT = "https://codewhisperer.us-east-1.amazonaws.com/generateAssistantResponse"
+KIRO_MODEL_ID = "claude-sonnet-4.5"
+KIRO_VERSION = "0.6.18"
+
+
+def _get_kiro_token() -> str | None:
+    """Read Kiro access token from cache file."""
+    if not KIRO_TOKEN_PATH.exists():
+        return None
+    try:
+        data = json.loads(KIRO_TOKEN_PATH.read_text(encoding="utf-8"))
+        return data.get("accessToken")
+    except Exception:
+        return None
+
+
+def _get_kiro_profile_arn() -> str | None:
+    """Read Kiro profile ARN from profile.json."""
+    profile_path = Path(os.environ.get("APPDATA", "")) / "Kiro" / "User" / "globalStorage" / "kiro.kiroagent" / "profile.json"
+    if not profile_path.exists():
+        return None
+    try:
+        data = json.loads(profile_path.read_text(encoding="utf-8"))
+        return data.get("arn")
+    except Exception:
+        return None
+
+
+def _build_kiro_payload(system_prompt: str, user_message: str) -> dict:
+    """Build Kiro API payload in the conversationState format."""
+    # Combine system prompt and user message
+    combined_content = f"{system_prompt}\n\n---\n\n{user_message}\n\nReturn ONLY valid JSON. No markdown, no explanation."
+
+    payload = {
+        "conversationState": {
+            "chatTriggerType": "MANUAL",
+            "conversationId": str(uuid.uuid4()),
+            "currentMessage": {
+                "userInputMessage": {
+                    "content": combined_content,
+                    "modelId": KIRO_MODEL_ID,
+                    "origin": "AI_EDITOR",
+                }
+            },
+        }
+    }
+
+    profile_arn = _get_kiro_profile_arn()
+    if profile_arn:
+        payload["profileArn"] = profile_arn
+
+    return payload
+
+
+def _get_kiro_headers(token: str) -> dict:
+    """Build Kiro API request headers."""
+    return {
+        "Content-Type": "application/json",
+        "Accept": "*/*",
+        "X-Amz-Target": "AmazonCodeWhispererStreamingService.GenerateAssistantResponse",
+        "User-Agent": f"aws-sdk-js/1.0.18 ua/2.1 os/windows lang/js md/nodejs#20.16.0 api/codewhispererstreaming#1.0.18 m/E KiroIDE-{KIRO_VERSION}",
+        "X-Amz-User-Agent": f"aws-sdk-js/1.0.18 KiroIDE-{KIRO_VERSION}",
+        "x-amzn-kiro-agent-mode": "spec",
+        "x-amzn-codewhisperer-optout": "true",
+        "Amz-Sdk-Request": "attempt=1; max=3",
+        "Amz-Sdk-Invocation-Id": str(uuid.uuid4()),
+        "Authorization": f"Bearer {token}",
+    }
+
+
+def _parse_event_stream(raw_bytes: bytes) -> str:
+    """Parse AWS event stream response to extract assistant text.
+    
+    The response is in AWS binary event stream format.
+    We look for assistantResponseEvent content in the raw bytes.
+    """
+    text_parts = []
+    raw_text = raw_bytes.decode("utf-8", errors="replace")
+
+    # The event stream contains JSON fragments with assistantResponseEvent
+    # Try to find all JSON objects in the stream
+    import re
+    # Look for content fields in the response
+    for match in re.finditer(r'"content"\s*:\s*"((?:[^"\\]|\\.)*)"', raw_text):
+        content = match.group(1)
+        # Unescape JSON string
+        try:
+            content = json.loads(f'"{content}"')
+        except Exception:
+            pass
+        if content and content not in ("understood", "Continue", "Hello"):
+            text_parts.append(content)
+
+    return "".join(text_parts)
+
 
 async def call_llm(system_prompt: str, user_message: str) -> dict:
-    """Call LLM and return parsed JSON. Tries Bedrock first, falls back to OpenAI."""
+    """Call LLM and return parsed JSON. Tries Kiro first, then Bedrock, then OpenAI."""
 
-    # Try AWS Bedrock first
+    # Try Kiro first (uses Kiro Credits)
+    kiro_token = _get_kiro_token()
+    if kiro_token:
+        try:
+            return await _call_kiro(system_prompt, user_message, kiro_token)
+        except Exception as e:
+            print(f"[LLM] Kiro failed: {e}, trying next provider...")
+
+    # Try AWS Bedrock
     if os.getenv("AWS_ACCESS_KEY_ID"):
         try:
             return await _call_bedrock(system_prompt, user_message)
@@ -34,7 +142,50 @@ async def call_llm(system_prompt: str, user_message: str) -> dict:
     if os.getenv("OPENAI_API_KEY"):
         return await _call_openai(system_prompt, user_message)
 
-    raise RuntimeError("No LLM provider configured. Set AWS or OPENAI credentials in .env")
+    raise RuntimeError("No LLM provider configured. Set Kiro credits, AWS, or OPENAI credentials.")
+
+
+async def _call_kiro(system_prompt: str, user_message: str, token: str) -> dict:
+    """Call Kiro API (CodeWhisperer) using Kiro Credits."""
+    import asyncio
+    import httpx
+
+    payload = _build_kiro_payload(system_prompt, user_message)
+    headers = _get_kiro_headers(token)
+
+    print(f"[LLM] Calling Kiro API (model: {KIRO_MODEL_ID})...")
+
+    async with httpx.AsyncClient(timeout=60.0) as client:
+        response = await client.post(
+            KIRO_ENDPOINT,
+            headers=headers,
+            json=payload,
+        )
+
+    if response.status_code == 429:
+        raise RuntimeError("Kiro quota exhausted (429)")
+    if response.status_code in (401, 403):
+        raise RuntimeError(f"Kiro auth error ({response.status_code}): {response.text[:200]}")
+    if response.status_code != 200:
+        raise RuntimeError(f"Kiro API error ({response.status_code}): {response.text[:200]}")
+
+    # Parse event stream response
+    text = _parse_event_stream(response.content)
+
+    if not text:
+        raise RuntimeError("Kiro returned empty response")
+
+    print(f"[LLM] Kiro response length: {len(text)} chars")
+
+    # Extract JSON from response (may have extra text around it)
+    # Find the first { and last } to extract JSON
+    json_start = text.find("{")
+    json_end = text.rfind("}") + 1
+    if json_start >= 0 and json_end > json_start:
+        json_str = text[json_start:json_end]
+        return json.loads(json_str)
+
+    raise RuntimeError(f"Could not parse JSON from Kiro response: {text[:200]}")
 
 
 async def _call_bedrock(system_prompt: str, user_message: str) -> dict:
