@@ -70,25 +70,23 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 padding: const EdgeInsets.fromLTRB(20, 14, 16, 0),
                 child: Row(
                   children: [
-                    // App icon + name (only when collapsed or no tasks)
-                    if (!_inputExpanded || !hasTasks) ...[
-                      Container(
-                        width: 34,
-                        height: 34,
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.primary.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Icon(Icons.auto_awesome_rounded,
-                            size: 18, color: theme.colorScheme.primary),
+                    // App icon + name (always visible)
+                    Container(
+                      width: 34,
+                      height: 34,
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(10),
                       ),
-                      const SizedBox(width: 9),
-                      Text('Clarity',
-                          style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w700, letterSpacing: -0.3)),
-                    ],
+                      child: Icon(Icons.auto_awesome_rounded,
+                          size: 18, color: theme.colorScheme.primary),
+                    ),
+                    const SizedBox(width: 9),
+                    Text('Clarity',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w700, letterSpacing: -0.3)),
                     const Spacer(),
-                    // Add button (when input collapsed)
+                    // Chat button (when input collapsed)
                     if (!_inputExpanded && hasTasks)
                       _IconChip(
                         icon: Icons.chat_bubble_outline_rounded,
