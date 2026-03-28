@@ -26,6 +26,19 @@ class TaskCard extends StatelessWidget {
     }
   }
 
+  IconData _priorityIcon(String? priority) {
+    switch (priority) {
+      case 'urgent_important':
+        return Icons.priority_high_rounded;
+      case 'important_not_urgent':
+        return Icons.schedule_rounded;
+      case 'urgent_not_important':
+        return Icons.flash_on_rounded;
+      default:
+        return Icons.remove_rounded;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -87,6 +100,17 @@ class TaskCard extends StatelessWidget {
                         fontSize: 13,
                       ),
                     ),
+                  )
+                : null,
+            trailing: task.priority != null
+                ? Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: _priorityColor(task.priority),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(_priorityIcon(task.priority), size: 16),
                   )
                 : null,
           ),
