@@ -1,6 +1,10 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import '../providers/task_provider.dart';
+import '../services/api_service.dart';
 import '../services/notification_service.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -13,6 +17,58 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   int _aboutTapCount = 0;
   bool _dailyReminderEnabled = false;
+
+  Future<void> _testWhisper(BuildContext context, String assetPath, String label) async {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Transcribing $label...'),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        duration: const Duration(seconds: 10),
+      ),
+    );
+
+    try {
+      // Copy asset to temp file
+      final byteData = await rootBundle.load(assetPath);
+      final tempDir = await getTemporaryDirectory();
+      final tempFile = File('${tempDir.path}/${assetPath.split('/').last}');
+      await tempFile.writeAsBytes(byteData.buffer.asUint8List());
+
+      // Send to backend
+      final api = ApiService();
+      final text = await api.transcribeAudio(tempFile.path);
+
+      // Clean up
+      await tempFile.delete();
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            title: Text('$label Result'),
+            content: Text(text.isEmpty ? '(empty transcription)' : text),
+            actions: [
+              FilledButton(onPressed: () => Navigator.pop(ctx), child: const Text('OK')),
+            ],
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Whisper error: $e'),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -181,7 +237,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ),
                         ],
                       ),
-                      // Test button only in dev mode
+                      // Test buttons only in dev mode
                       if (provider.isTestMode) ...[
                         const SizedBox(height: 12),
                         SizedBox(
@@ -203,6 +259,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                             ),
                             child: const Text('Test Notification'),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton.tonal(
+                            onPressed: () => _testWhisper(context, 'assets/test_1.mp3', 'Test Voice 1'),
+                            style: FilledButton.styleFrom(
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            ),
+                            child: const Text('Test Whisper — Voice 1'),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton.tonal(
+                            onPressed: () => _testWhisper(context, 'assets/test_2.mp3', 'Test Voice 2'),
+                            style: FilledButton.styleFrom(
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            ),
+                            child: const Text('Test Whisper — Voice 2'),
                           ),
                         ),
                       ],

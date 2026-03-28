@@ -31,3 +31,5 @@ flutter:
   uses-material-design: true
   assets:
     - assets/
+    - assets/test_1.mp3
+    - assets/test_2.mp3
