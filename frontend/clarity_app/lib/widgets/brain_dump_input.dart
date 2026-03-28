@@ -63,7 +63,7 @@ class _BrainDumpInputState extends State<BrainDumpInput> {
       children: [
         Container(
           decoration: BoxDecoration(
-            color: theme.brightness == Brightness.dark ? const Color(0xFF1E2024) : const Color(0xFFF3F4F6),
+            color: theme.brightness == Brightness.dark ? const Color(0xFF252320) : const Color(0xFFF3F4F6),
             borderRadius: BorderRadius.circular(16),
           ),
           child: Column(

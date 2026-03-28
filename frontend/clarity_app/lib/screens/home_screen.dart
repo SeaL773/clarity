@@ -56,7 +56,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              theme.brightness == Brightness.dark ? const Color(0xFF1A1E25) : const Color(0xFFEEF2FA),
+              theme.brightness == Brightness.dark ? const Color(0xFF211F1B) : const Color(0xFFEEF2FA),
               theme.scaffoldBackgroundColor,
             ],
             stops: const [0.0, 0.35],
@@ -91,7 +91,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.8),
+                          color: theme.brightness == Brightness.dark
+                            ? Colors.white.withValues(alpha: 0.08)
+                            : Colors.white.withValues(alpha: 0.8),
                           borderRadius: BorderRadius.circular(22),
                           border: Border.all(color: Colors.grey.shade200.withValues(alpha: 0.5)),
                           boxShadow: [
@@ -114,7 +116,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                             Container(
                               width: 1,
                               height: 20,
-                              color: Colors.grey.shade200,
+                              color: theme.brightness == Brightness.dark ? Colors.white.withValues(alpha: 0.1) : Colors.grey.shade200,
                             ),
                             _PillIcon(
                               icon: Icons.delete_outline_rounded,

@@ -58,12 +58,13 @@ class ClarityApp extends StatelessWidget {
     return ThemeData(
       useMaterial3: true,
       colorScheme: ColorScheme.fromSeed(
-        seedColor: const Color(0xFF7BA3E0),
+        seedColor: const Color(0xFFA8886B),
         brightness: Brightness.dark,
-        surface: const Color(0xFF111315),
-        onSurface: const Color(0xFFE2E2E5),
+        surface: const Color(0xFF1A1915),
+        onSurface: const Color(0xFFE8E4DF),
+        primary: const Color(0xFFA8886B),
       ),
-      scaffoldBackgroundColor: const Color(0xFF111315),
+      scaffoldBackgroundColor: const Color(0xFF1A1915),
       textTheme: GoogleFonts.interTextTheme(
         ThemeData(brightness: Brightness.dark).textTheme,
       ),

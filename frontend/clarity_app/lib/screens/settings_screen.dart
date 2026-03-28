@@ -204,7 +204,7 @@ class _SettingsSection extends StatelessWidget {
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
-            color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF1E2024) : Colors.white,
+            color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF252320) : Colors.white,
             borderRadius: BorderRadius.circular(16),
           ),
           child: Column(
