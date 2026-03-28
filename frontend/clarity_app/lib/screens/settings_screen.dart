@@ -3,8 +3,16 @@ import 'package:provider/provider.dart';
 import '../providers/task_provider.dart';
 import '../services/notification_service.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
+
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  int _aboutTapCount = 0;
+  bool _dailyReminderEnabled = false;
 
   @override
   Widget build(BuildContext context) {
@@ -22,121 +30,60 @@ class SettingsScreen extends StatelessWidget {
                     fontWeight: FontWeight.w700, letterSpacing: -0.3)),
             const SizedBox(height: 20),
 
-            // About section
+            // About — tap 3 times to enable dev mode
             _SettingsSection(
               title: 'About',
               children: [
-                _SettingsTile(
-                  icon: Icons.auto_awesome_rounded,
-                  title: 'Clarity',
-                  subtitle: 'AI-powered smart todo list',
-                  trailing: Text('v1.0.0',
+                GestureDetector(
+                  onTap: () {
+                    _aboutTapCount++;
+                    if (_aboutTapCount >= 3 && !provider.isTestMode) {
+                      provider.toggleTestMode();
+                      _aboutTapCount = 0;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: const Text('Development mode enabled'),
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          duration: const Duration(seconds: 2),
+                        ),
+                      );
+                    } else if (_aboutTapCount >= 3 && provider.isTestMode) {
+                      provider.toggleTestMode();
+                      _aboutTapCount = 0;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: const Text('Development mode disabled'),
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          duration: const Duration(seconds: 2),
+                        ),
+                      );
+                    }
+                    // Reset tap count after 2 seconds
+                    Future.delayed(const Duration(seconds: 2), () {
+                      _aboutTapCount = 0;
+                    });
+                  },
+                  child: _SettingsTile(
+                    icon: Icons.auto_awesome_rounded,
+                    title: 'Clarity',
+                    subtitle: 'AI-powered smart todo list',
+                    trailing: Text(
+                      provider.isTestMode ? 'dev' : 'v1.0.0',
                       style: theme.textTheme.labelSmall?.copyWith(
-                          color: theme.colorScheme.onSurface.withValues(alpha: 0.3))),
+                        color: provider.isTestMode
+                            ? theme.colorScheme.primary
+                            : theme.colorScheme.onSurface.withValues(alpha: 0.3),
+                        fontWeight: provider.isTestMode ? FontWeight.w600 : FontWeight.w400,
+                      ),
+                    ),
+                  ),
                 ),
                 _SettingsTile(
                   icon: Icons.favorite_outline_rounded,
                   title: 'Designed for ADHD',
                   subtitle: 'No time pressure, encouraging feedback',
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 16),
-
-            // Features section
-            _SettingsSection(
-              title: 'How it works',
-              children: [
-                _SettingsTile(
-                  icon: Icons.edit_note_rounded,
-                  title: 'Brain Dump',
-                  subtitle: 'Type or speak anything on your mind',
-                ),
-                _SettingsTile(
-                  icon: Icons.psychology_rounded,
-                  title: 'AI Pipeline',
-                  subtitle: '3-step: Parse → Prioritize → Organize',
-                ),
-                _SettingsTile(
-                  icon: Icons.insights_rounded,
-                  title: 'Daily Recap',
-                  subtitle: 'Encouraging summary of your progress',
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 16),
-
-            // Mode
-            _SettingsSection(
-              title: 'Mode',
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 34,
-                        height: 34,
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.primary.withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(9),
-                        ),
-                        child: Icon(Icons.science_outlined, size: 18,
-                            color: theme.colorScheme.primary.withValues(alpha: 0.6)),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Test Mode', style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500)),
-                            Text('Use mock data without backend', style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.onSurface.withValues(alpha: 0.4))),
-                          ],
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () => provider.toggleTestMode(),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 250),
-                          width: 50,
-                          height: 28,
-                          padding: const EdgeInsets.all(3),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(14),
-                            color: provider.isTestMode
-                                ? theme.colorScheme.primary
-                                : theme.colorScheme.onSurface.withValues(alpha: 0.12),
-                          ),
-                          child: AnimatedAlign(
-                            duration: const Duration(milliseconds: 250),
-                            curve: Curves.easeOut,
-                            alignment: provider.isTestMode ? Alignment.centerRight : Alignment.centerLeft,
-                            child: Container(
-                              width: 22,
-                              height: 22,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.white,
-                                boxShadow: [
-                                  BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 4, offset: const Offset(0, 1)),
-                                ],
-                              ),
-                              child: Center(
-                                child: Icon(
-                                  provider.isTestMode ? Icons.science_rounded : Icons.cloud_outlined,
-                                  size: 13,
-                                  color: provider.isTestMode ? theme.colorScheme.primary : Colors.grey.shade400,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
                 ),
               ],
             ),
@@ -172,49 +119,13 @@ class SettingsScreen extends StatelessWidget {
                           ],
                         ),
                       ),
-                      GestureDetector(
-                        onTap: () => provider.toggleDarkMode(),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 250),
-                          width: 50,
-                          height: 28,
-                          padding: const EdgeInsets.all(3),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(14),
-                            color: provider.isDarkMode
-                                ? theme.colorScheme.primary
-                                : theme.colorScheme.onSurface.withValues(alpha: 0.12),
-                          ),
-                          child: AnimatedAlign(
-                            duration: const Duration(milliseconds: 250),
-                            curve: Curves.easeOut,
-                            alignment: provider.isDarkMode ? Alignment.centerRight : Alignment.centerLeft,
-                            child: Container(
-                              width: 22,
-                              height: 22,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.white,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.1),
-                                    blurRadius: 4,
-                                    offset: const Offset(0, 1),
-                                  ),
-                                ],
-                              ),
-                              child: Center(
-                                child: Icon(
-                                  provider.isDarkMode ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
-                                  size: 13,
-                                  color: provider.isDarkMode
-                                      ? theme.colorScheme.primary
-                                      : Colors.orange.shade300,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
+                      _CustomToggle(
+                        value: provider.isDarkMode,
+                        onChanged: () => provider.toggleDarkMode(),
+                        activeIcon: Icons.dark_mode_rounded,
+                        inactiveIcon: Icons.light_mode_rounded,
+                        activeColor: theme.colorScheme.primary,
+                        inactiveIconColor: Colors.orange.shade300,
                       ),
                     ],
                   ),
@@ -255,32 +166,73 @@ class SettingsScreen extends StatelessWidget {
                               ],
                             ),
                           ),
+                          _CustomToggle(
+                            value: _dailyReminderEnabled,
+                            onChanged: () async {
+                              setState(() => _dailyReminderEnabled = !_dailyReminderEnabled);
+                              if (_dailyReminderEnabled) {
+                                await NotificationService().scheduleDailyReminder(hour: 9, minute: 0);
+                              } else {
+                                await NotificationService().cancelAll();
+                              }
+                            },
+                            activeIcon: Icons.notifications_active_rounded,
+                            inactiveIcon: Icons.notifications_off_outlined,
+                            activeColor: theme.colorScheme.primary,
+                          ),
                         ],
                       ),
-                      const SizedBox(height: 12),
-                      SizedBox(
-                        width: double.infinity,
-                        child: FilledButton.tonal(
-                          onPressed: () async {
-                            await NotificationService().showTestNotification();
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: const Text('Notification sent! Check your notification tray.'),
-                                  behavior: SnackBarBehavior.floating,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                ),
-                              );
-                            }
-                          },
-                          style: FilledButton.styleFrom(
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      // Test button only in dev mode
+                      if (provider.isTestMode) ...[
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton.tonal(
+                            onPressed: () async {
+                              await NotificationService().showTestNotification();
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: const Text('Notification sent! Check your notification tray.'),
+                                    behavior: SnackBarBehavior.floating,
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                  ),
+                                );
+                              }
+                            },
+                            style: FilledButton.styleFrom(
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            ),
+                            child: const Text('Test Notification'),
                           ),
-                          child: const Text('Test Notification'),
                         ),
-                      ),
+                      ],
                     ],
                   ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 16),
+
+            // How it works
+            _SettingsSection(
+              title: 'How it works',
+              children: [
+                _SettingsTile(
+                  icon: Icons.edit_note_rounded,
+                  title: 'Brain Dump',
+                  subtitle: 'Type or speak anything on your mind',
+                ),
+                _SettingsTile(
+                  icon: Icons.psychology_rounded,
+                  title: 'AI Pipeline',
+                  subtitle: '3-step: Parse → Prioritize → Organize',
+                ),
+                _SettingsTile(
+                  icon: Icons.insights_rounded,
+                  title: 'Daily Recap',
+                  subtitle: 'Encouraging summary of your progress',
                 ),
               ],
             ),
@@ -301,6 +253,75 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 }
+
+// ── Custom Toggle ──
+
+class _CustomToggle extends StatelessWidget {
+  final bool value;
+  final VoidCallback onChanged;
+  final IconData activeIcon;
+  final IconData inactiveIcon;
+  final Color activeColor;
+  final Color? inactiveIconColor;
+
+  const _CustomToggle({
+    required this.value,
+    required this.onChanged,
+    required this.activeIcon,
+    required this.inactiveIcon,
+    required this.activeColor,
+    this.inactiveIconColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return GestureDetector(
+      onTap: onChanged,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        width: 50,
+        height: 28,
+        padding: const EdgeInsets.all(3),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(14),
+          color: value
+              ? activeColor
+              : theme.colorScheme.onSurface.withValues(alpha: 0.12),
+        ),
+        child: AnimatedAlign(
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeOut,
+          alignment: value ? Alignment.centerRight : Alignment.centerLeft,
+          child: Container(
+            width: 22,
+            height: 22,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.1),
+                  blurRadius: 4,
+                  offset: const Offset(0, 1),
+                ),
+              ],
+            ),
+            child: Center(
+              child: Icon(
+                value ? activeIcon : inactiveIcon,
+                size: 13,
+                color: value ? activeColor : (inactiveIconColor ?? Colors.grey.shade400),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Settings Section ──
 
 class _SettingsSection extends StatelessWidget {
   final String title;
@@ -339,6 +360,8 @@ class _SettingsSection extends StatelessWidget {
     );
   }
 }
+
+// ── Settings Tile ──
 
 class _SettingsTile extends StatelessWidget {
   final IconData icon;
@@ -386,36 +409,6 @@ class _SettingsTile extends StatelessWidget {
           if (trailing != null) trailing!,
         ],
       ),
-    );
-  }
-}
-
-class _ComingSoonBadge extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: Colors.orange.shade50,
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Text('Soon',
-          style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: Colors.orange.shade400)),
-    );
-  }
-}
-
-class _DoneBadge extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: Colors.green.shade50,
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Text('Live',
-          style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: Colors.green.shade500)),
     );
   }
 }
