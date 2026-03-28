@@ -155,6 +155,119 @@ class _CalendarScreenState extends State<CalendarScreen> {
     }
   }
 
+  Color _taskColor(String? priority) {
+    switch (priority) {
+      case 'urgent_important': return const Color(0xFFE57373);
+      case 'urgent_not_important': return const Color(0xFFFFB74D);
+      case 'important_not_urgent': return const Color(0xFF7BAAF7);
+      default: return const Color(0xFFBDBDBD);
+    }
+  }
+
+  Widget _buildTimeline(ThemeData theme) {
+    // Sort tasks: timed tasks first (by time), then untimed
+    final timed = _selectedTasks.where((t) => t.dueTime != null).toList()
+      ..sort((a, b) => a.dueTime!.compareTo(b.dueTime!));
+    final untimed = _selectedTasks.where((t) => t.dueTime == null).toList();
+    final sorted = [...timed, ...untimed];
+
+    return ListView.builder(
+      padding: const EdgeInsets.fromLTRB(18, 0, 18, 90),
+      itemCount: sorted.length,
+      itemBuilder: (context, index) {
+        final task = sorted[index];
+        final color = _taskColor(task.priority);
+        final isLast = index == sorted.length - 1;
+
+        return IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Time column
+              SizedBox(
+                width: 48,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Text(
+                    task.dueTime ?? '',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: theme.colorScheme.onSurface.withValues(alpha: task.dueTime != null ? 0.45 : 0),
+                      fontWeight: FontWeight.w500,
+                      fontSize: 11,
+                    ),
+                  ),
+                ),
+              ),
+
+              // Timeline line + dot
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Column(
+                  children: [
+                    Container(
+                      width: 10,
+                      height: 10,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: task.completed ? color.withValues(alpha: 0.3) : color,
+                        border: Border.all(
+                          color: task.completed ? color.withValues(alpha: 0.2) : color,
+                          width: 2,
+                        ),
+                      ),
+                    ),
+                    if (!isLast)
+                      Expanded(
+                        child: Container(
+                          width: 1.5,
+                          color: theme.colorScheme.onSurface.withValues(alpha: 0.06),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+
+              // Task card
+              Expanded(
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(context, MaterialPageRoute(
+                      builder: (_) => CalendarDayScreen(date: _selectedDay, tasks: _selectedTasks),
+                    ));
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: task.completed
+                          ? theme.colorScheme.onSurface.withValues(alpha: 0.03)
+                          : color.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border(
+                        left: BorderSide(color: task.completed ? color.withValues(alpha: 0.2) : color, width: 3),
+                      ),
+                    ),
+                    child: Text(
+                      task.title,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.w500,
+                        decoration: task.completed ? TextDecoration.lineThrough : null,
+                        color: task.completed
+                            ? theme.colorScheme.onSurface.withValues(alpha: 0.3)
+                            : theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildDayCell(BuildContext context, DateTime day, bool isToday, bool isSelected) {
     final theme = Theme.of(context);
     final key = _dateKey(day);
@@ -264,12 +377,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 _focusedDay = focused;
               });
               _loadTasksForDay(selected);
-              // Navigate to day detail screen
-              final key = _dateKey(selected);
-              final tasks = _taskCache[key] ?? [];
-              Navigator.push(context, MaterialPageRoute(
-                builder: (_) => CalendarDayScreen(date: selected, tasks: tasks),
-              ));
             },
             onPageChanged: (focused) {
               _focusedDay = focused;
@@ -316,13 +423,46 @@ class _CalendarScreenState extends State<CalendarScreen> {
             ),
           ),
 
-          // Hint
-          Expanded(
-            child: Center(
-              child: Text('Tap a date to see tasks',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.25))),
+          const SizedBox(height: 4),
+
+          // Day timeline header
+          Padding(
+            padding: const EdgeInsets.fromLTRB(22, 4, 22, 6),
+            child: Row(
+              children: [
+                Text(
+                  isSameDay(_selectedDay, DateTime.now())
+                      ? 'Today'
+                      : DateFormat('EEE, MMM d').format(_selectedDay),
+                  style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+                ),
+                if (_selectedTasks.isNotEmpty) ...[
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primary.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      '${_selectedTasks.where((t) => t.completed).length}/${_selectedTasks.length}',
+                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: theme.colorScheme.primary),
+                    ),
+                  ),
+                ],
+              ],
             ),
+          ),
+
+          // Timeline view
+          Expanded(
+            child: _selectedTasks.isEmpty
+                ? Center(
+                    child: Text('No tasks',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.2))),
+                  )
+                : _buildTimeline(theme),
           ),
         ],
       ),

@@ -7,6 +7,7 @@ class Task {
   final List<Task> subTasks;
   final String? priority;
   final int? estimatedMinutes;
+  final String? dueTime; // "HH:mm" format, e.g. "14:00"
   final bool completed;
 
   const Task({
@@ -16,6 +17,7 @@ class Task {
     this.subTasks = const [],
     this.priority,
     this.estimatedMinutes,
+    this.dueTime,
     this.completed = false,
   });
 
@@ -30,6 +32,7 @@ class Task {
           [],
       priority: json['priority'],
       estimatedMinutes: json['estimated_minutes'],
+      dueTime: json['due_time'],
       completed: json['completed'] ?? false,
     );
   }
@@ -42,6 +45,7 @@ class Task {
       'sub_tasks': subTasks.map((t) => t.toJson()).toList(),
       'priority': priority,
       'estimated_minutes': estimatedMinutes,
+      'due_time': dueTime,
       'completed': completed,
     };
   }
@@ -53,6 +57,7 @@ class Task {
     List<Task>? subTasks,
     String? priority,
     int? estimatedMinutes,
+    String? dueTime,
     bool? completed,
   }) {
     return Task(
@@ -62,6 +67,7 @@ class Task {
       subTasks: subTasks ?? this.subTasks,
       priority: priority ?? this.priority,
       estimatedMinutes: estimatedMinutes ?? this.estimatedMinutes,
+      dueTime: dueTime ?? this.dueTime,
       completed: completed ?? this.completed,
     );
   }
