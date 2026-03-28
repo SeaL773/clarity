@@ -67,19 +67,44 @@ Each step has its own **dedicated prompt** designed for the task — not one gen
 | **AI** | Anthropic Claude (Haiku 4.5) | Multi-step LLM pipeline |
 | **Database** | SQLite + aiosqlite | Lightweight async persistence |
 | **Voice** | speech_to_text | On-device speech recognition |
+| **Notifications** | flutter_local_notifications | Daily reminder system |
+| **Calendar** | table_calendar | Monthly view with task tracking |
 
 ## Features
 
+### Core
 - **Brain dump input** — Text or voice, messy is fine
 - **AI task extraction** — Finds tasks you didn't even realize you had
 - **Eisenhower Matrix prioritization** — Color-coded by urgency × importance
 - **Sub-task breakdown** — Big tasks split into manageable steps
 - **Auto-complete parent tasks** — All sub-tasks done? Parent checks itself
 - **Completed tasks sink** — Done items move to the bottom, stay organized
-- **Daily recap** — AI-generated progress summary with encouragement
-- **Dark mode** — Warm Claude-style dark theme
-- **Frosted glass UI** — Modern floating navigation bar
-- **ADHD-friendly design** — No time pressure, calm colors, encouraging tone
+- **Append mode** — Add more tasks without losing existing ones
+
+### Calendar
+- **Monthly calendar view** — See all your tasks at a glance
+- **Urgency progress bars** — Each day shows a color-coded bar (deeper = more urgent, filled = more complete)
+- **Timeline view** — Google Calendar-style with due times, priority colors, and task cards
+- **Day detail screen** — Tap twice to see full task list for any date
+- **Historical view** — Browse past days' tasks (read-only)
+
+### Daily Recap
+- **AI-generated summary** — Encouraging progress report
+- **Completion ring** — Visual progress indicator
+- **Tomorrow's focus** — AI suggests what to carry over
+- **Dedicated recap screen** — Full-screen experience
+
+### Notifications & Celebrations
+- **Daily check-in reminder** — Gentle notification at your preferred time
+- **Celebration moments** — ⚡ First task done, 🔥 halfway there, 🎉 all complete
+- **ADHD-friendly** — Encouraging, never nagging
+
+### Design
+- **Dark mode** — Warm Claude-style dark theme (brown-gray tones)
+- **Frosted glass navigation** — Floating pill bar with backdrop blur
+- **Branded splash screen** — Gradient launch with fade-in animation
+- **Platform-aware API** — Auto-detects Android emulator vs web vs device
+- **Collapsible input** — Shrinks on scroll, expands on tap
 
 ## Quick Start
 
@@ -123,6 +148,7 @@ AWS_ACCESS_KEY_ID=...
 | `POST` | `/api/process` | Full pipeline (parse + plan) |
 | `GET` | `/api/tasks/{date}` | Get tasks for a date |
 | `POST` | `/api/tasks/{date}` | Save tasks for a date |
+| `DELETE` | `/api/tasks/{date}` | Delete tasks for a date |
 
 ## Project Structure
 
@@ -130,11 +156,11 @@ AWS_ACCESS_KEY_ID=...
 clarity/
 ├── backend/
 │   ├── app/
-│   │   ├── main.py              # FastAPI routes
+│   │   ├── main.py              # FastAPI routes + rate limiting
 │   │   ├── models.py            # Pydantic schemas
-│   │   ├── database.py          # SQLite operations
+│   │   ├── database.py          # SQLite with atomic transactions
 │   │   └── llm/
-│   │       ├── client.py        # Multi-provider LLM client
+│   │       ├── client.py        # Multi-provider LLM client (Anthropic/Kiro/Bedrock/OpenAI)
 │   │       ├── parser.py        # Step 1: brain dump → tasks
 │   │       ├── planner.py       # Step 2: prioritize & order
 │   │       └── summarizer.py    # Step 3: daily recap
@@ -145,13 +171,27 @@ clarity/
 │
 ├── frontend/clarity_app/
 │   └── lib/
-│       ├── main.dart            # App entry + theming
-│       ├── models/task.dart     # Data models
-│       ├── providers/           # State management
-│       ├── screens/             # Home, Recap, Settings
-│       ├── services/            # API client, speech
-│       └── widgets/             # Task cards, input, summary
+│       ├── main.dart            # App entry + light/dark theming
+│       ├── models/task.dart     # Immutable data models with dueTime
+│       ├── providers/           # State management + test mode
+│       ├── screens/
+│       │   ├── splash_screen    # Branded launch screen
+│       │   ├── main_shell       # Tab navigation with frosted glass bar
+│       │   ├── home_screen      # Brain dump + task list
+│       │   ├── calendar_screen  # Monthly view + timeline
+│       │   ├── calendar_day     # Full day detail view
+│       │   ├── recap_screen     # Daily AI summary
+│       │   └── settings_screen  # Dark mode, reminders, dev mode
+│       ├── services/
+│       │   ├── api_service      # Platform-aware HTTP client
+│       │   ├── speech_service   # Voice input with error handling
+│       │   └── notification     # Local push notifications
+│       └── widgets/
+│           ├── brain_dump_input # Collapsible text + voice input
+│           ├── task_card        # Priority-colored task with sub-tasks
+│           └── summary_card     # Recap with progress ring
 │
+├── README.md
 └── TECH_DOC.md                  # Detailed technical documentation
 ```
 
@@ -164,6 +204,8 @@ Clarity is designed with **cognitive accessibility** as a core principle:
 - **Encouraging tone** — AI never judges, always reframes positively
 - **Voice input** — Lowers barrier when typing feels overwhelming
 - **Calm UI** — Low-stimulation colors, generous whitespace, no clutter
+- **Celebration moments** — Dopamine hits for completing tasks (⚡🔥🎉)
+- **Gentle reminders** — Daily check-in, never nagging
 
 > *366M+ people worldwide are affected by ADHD. Executive dysfunction isn't laziness — it's a neurological difficulty with task initiation and planning. Clarity helps bridge that gap.*
 
