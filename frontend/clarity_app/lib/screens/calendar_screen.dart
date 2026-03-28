@@ -226,6 +226,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
           // Calendar
           TableCalendar(
+            rowHeight: 52,
             firstDay: DateTime(2025, 1, 1),
             lastDay: DateTime(2027, 12, 31),
             focusedDay: _focusedDay,
@@ -274,7 +275,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
               defaultTextStyle: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.7), fontSize: 13),
               weekendTextStyle: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.5), fontSize: 13),
               cellMargin: const EdgeInsets.all(2),
-              rowHeight: 48,
             ),
             calendarBuilders: CalendarBuilders(
               defaultBuilder: (context, day, focusedDay) {
