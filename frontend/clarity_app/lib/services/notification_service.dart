@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class NotificationService {
@@ -11,7 +12,7 @@ class NotificationService {
   Future<void> init() async {
     if (_initialized) return;
 
-    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidSettings = AndroidInitializationSettings('@drawable/ic_notification');
     const initSettings = InitializationSettings(android: androidSettings);
 
     await _plugin.initialize(initSettings);
@@ -24,10 +25,8 @@ class NotificationService {
 
   Future<void> scheduleDailyReminder({required int hour, required int minute}) async {
     await init();
-    // Cancel existing
     await _plugin.cancelAll();
 
-    // For demo: show a notification in 5 seconds to prove it works
     await _plugin.show(
       0,
       'Clarity ✨',
@@ -39,7 +38,8 @@ class NotificationService {
           channelDescription: 'Daily check-in reminder',
           importance: Importance.high,
           priority: Priority.high,
-          icon: '@mipmap/ic_launcher',
+          icon: '@drawable/ic_notification',
+          color: Color(0xFF5B7FBF),
         ),
       ),
     );
@@ -58,7 +58,8 @@ class NotificationService {
           channelDescription: 'Test notification channel',
           importance: Importance.high,
           priority: Priority.high,
-          icon: '@mipmap/ic_launcher',
+          icon: '@drawable/ic_notification',
+          color: Color(0xFF5B7FBF),
         ),
       ),
     );
