@@ -50,7 +50,6 @@ class _BrainDumpInputState extends State<BrainDumpInput> {
     _controller.clear();
     setState(() => _expanded = false);
     FocusScope.of(context).unfocus();
-    widget.onCollapse?.call();
   }
 
   @override

@@ -14,6 +14,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
   bool _inputExpanded = true;
   bool _autoCollapsed = false;
+  bool _manuallyOpened = false;
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
 
@@ -50,11 +51,11 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       });
     }
 
-    // Auto-collapse input once after first tasks load (not while loading)
-    if (hasTasks && _inputExpanded && !provider.isLoading && !_autoCollapsed) {
+    // Auto-collapse input once after first tasks load (not while loading, not if manually opened)
+    if (hasTasks && _inputExpanded && !provider.isLoading && !_autoCollapsed && !_manuallyOpened) {
       _autoCollapsed = true;
       Future.delayed(const Duration(milliseconds: 300), () {
-        if (mounted && !context.read<TaskProvider>().isLoading) {
+        if (mounted && !context.read<TaskProvider>().isLoading && !_manuallyOpened) {
           setState(() => _inputExpanded = false);
         }
       });
@@ -123,7 +124,10 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                               icon: _inputExpanded
                                   ? Icons.keyboard_arrow_up_rounded
                                   : Icons.chat_bubble_outline_rounded,
-                              onPressed: () => setState(() => _inputExpanded = !_inputExpanded),
+                              onPressed: () => setState(() {
+                                _inputExpanded = !_inputExpanded;
+                                _manuallyOpened = _inputExpanded;
+                              }),
                             ),
                             Container(
                               width: 1,
@@ -252,7 +256,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             notification.scrollDelta != null &&
             notification.scrollDelta! > 2 &&
             _inputExpanded &&
-            !provider.isLoading) {
+            !provider.isLoading &&
+            !_manuallyOpened) {
           setState(() => _inputExpanded = false);
         }
         return false;
