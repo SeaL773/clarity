@@ -36,6 +36,19 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   Future<void> _loadTasksForDay(DateTime day) async {
     final key = _dateKey(day);
+    final provider = Provider.of<TaskProvider>(context, listen: false);
+
+    // Use test data if in test mode
+    if (provider.isTestMode) {
+      final testTasks = provider.testMonthData[key] ?? [];
+      _taskCache[key] = testTasks;
+      setState(() {
+        _selectedTasks = testTasks;
+        _loadingTasks = false;
+      });
+      return;
+    }
+
     if (_taskCache.containsKey(key)) {
       setState(() => _selectedTasks = _taskCache[key]!);
       return;
@@ -59,6 +72,17 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   Future<void> _preloadMonth(DateTime month) async {
+    final provider = Provider.of<TaskProvider>(context, listen: false);
+
+    // In test mode, load from test data
+    if (provider.isTestMode) {
+      for (final entry in provider.testMonthData.entries) {
+        _taskCache[entry.key] = entry.value;
+      }
+      if (mounted) setState(() {});
+      return;
+    }
+
     final first = DateTime(month.year, month.month, 1);
     final last = DateTime(month.year, month.month + 1, 0);
     for (var d = first; !d.isAfter(last); d = d.add(const Duration(days: 1))) {

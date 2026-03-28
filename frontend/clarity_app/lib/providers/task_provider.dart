@@ -23,21 +23,93 @@ class TaskProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Test mode: mock data for entire month
+  final Map<String, List<Task>> testMonthData = {};
+
   void toggleTestMode() {
     _isTestMode = !_isTestMode;
     if (_isTestMode) {
+      _generateTestMonth();
       _loadTestData();
     } else {
+      testMonthData.clear();
       clearTasks();
       _loadTodayTasks();
     }
   }
 
   void _loadTestData() {
-    _tasks = _generateMockTasks();
+    final today = todayDate;
+    _tasks = testMonthData[today] ?? _generateMockTasks();
     _insights = "You've got a solid mix of priorities today — start with the quick wins!";
     _sortTasks();
     notifyListeners();
+  }
+
+  void _generateTestMonth() {
+    testMonthData.clear();
+    final now = DateTime.now();
+    final firstDay = DateTime(now.year, now.month, 1);
+    final lastDay = DateTime(now.year, now.month + 1, 0);
+
+    final taskTemplates = [
+      {'title': 'Review lecture notes', 'priority': 'important_not_urgent'},
+      {'title': 'Submit homework', 'priority': 'urgent_important'},
+      {'title': 'Go to the gym', 'priority': 'neither'},
+      {'title': 'Email professor', 'priority': 'urgent_not_important'},
+      {'title': 'Buy groceries', 'priority': 'important_not_urgent'},
+      {'title': 'Call mom', 'priority': 'important_not_urgent'},
+      {'title': 'Clean room', 'priority': 'neither'},
+      {'title': 'Group project meeting', 'priority': 'urgent_important'},
+      {'title': 'Do laundry', 'priority': 'neither'},
+      {'title': 'Study for midterm', 'priority': 'urgent_important'},
+      {'title': 'Renew parking permit', 'priority': 'urgent_not_important'},
+      {'title': 'Review resume', 'priority': 'important_not_urgent'},
+      {'title': 'Apply for internship', 'priority': 'important_not_urgent'},
+      {'title': 'Dentist appointment', 'priority': 'urgent_not_important'},
+      {'title': 'Pick up package', 'priority': 'urgent_not_important'},
+      {'title': 'Read chapter 5', 'priority': 'important_not_urgent'},
+      {'title': 'Fix bike tire', 'priority': 'neither'},
+      {'title': 'Prepare presentation', 'priority': 'urgent_important'},
+      {'title': 'Pay rent', 'priority': 'urgent_important'},
+      {'title': 'Schedule advising', 'priority': 'important_not_urgent'},
+      {'title': 'Return library books', 'priority': 'urgent_not_important'},
+      {'title': 'Meal prep Sunday', 'priority': 'neither'},
+      {'title': 'Update LinkedIn', 'priority': 'neither'},
+      {'title': 'Office hours', 'priority': 'important_not_urgent'},
+    ];
+
+    for (var d = firstDay; !d.isAfter(lastDay); d = d.add(const Duration(days: 1))) {
+      final key = DateFormat('yyyy-MM-dd').format(d);
+      final dayOfMonth = d.day;
+      final seed = dayOfMonth * 7;
+
+      // 3-6 tasks per day
+      final numTasks = 3 + (seed % 4);
+      final dayTasks = <Task>[];
+
+      for (var i = 0; i < numTasks; i++) {
+        final tpl = taskTemplates[(seed + i * 3) % taskTemplates.length];
+        // Past days: random completion. Future days: not completed
+        final isPast = d.isBefore(DateTime(now.year, now.month, now.day));
+        final isComplete = isPast && ((seed + i) % 3 != 0); // ~66% completion for past days
+
+        final hasSubTasks = i == 0 && numTasks > 3;
+        dayTasks.add(Task(
+          id: 'test-$key-$i',
+          title: tpl['title']!,
+          priority: tpl['priority'],
+          completed: isComplete,
+          subTasks: hasSubTasks ? [
+            Task(id: 'test-$key-$i-a', title: 'Step 1: Gather materials', completed: isComplete),
+            Task(id: 'test-$key-$i-b', title: 'Step 2: Do the work', completed: isPast && (seed % 2 == 0)),
+            Task(id: 'test-$key-$i-c', title: 'Step 3: Review and submit', completed: false),
+          ] : [],
+        ));
+      }
+
+      testMonthData[key] = dayTasks;
+    }
   }
 
   static List<Task> _generateMockTasks() {
