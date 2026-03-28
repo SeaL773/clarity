@@ -285,16 +285,6 @@ class SettingsScreen extends StatelessWidget {
               ],
             ),
 
-            const SizedBox(height: 16),
-
-            // Coming soon
-            _SettingsSection(
-              title: 'Coming Soon',
-              children: [
-
-              ],
-            ),
-
             const SizedBox(height: 24),
             Center(
               child: Text(
