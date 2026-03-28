@@ -78,7 +78,12 @@ class TaskProvider extends ChangeNotifier {
   void toggleTask(String taskId) {
     final idx = _tasks.indexWhere((t) => t.id == taskId);
     if (idx != -1) {
-      _tasks[idx] = _tasks[idx].copyWith(completed: !_tasks[idx].completed);
+      final newState = !_tasks[idx].completed;
+      _tasks[idx] = _tasks[idx].copyWith(completed: newState);
+      // Complete/uncomplete all sub-tasks with parent
+      for (var i = 0; i < _tasks[idx].subTasks.length; i++) {
+        _tasks[idx].subTasks[i] = _tasks[idx].subTasks[i].copyWith(completed: newState);
+      }
       notifyListeners();
       _api.saveTasks(todayDate, _tasks).catchError((_) {});
     }
