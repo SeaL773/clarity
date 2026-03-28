@@ -9,7 +9,7 @@
 [![Built with Flutter](https://img.shields.io/badge/Frontend-Flutter-02569B?logo=flutter)](https://flutter.dev)
 [![Powered by FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688?logo=fastapi)](https://fastapi.tiangolo.com)
 [![AI by Claude](https://img.shields.io/badge/AI-Claude_Haiku_4.5-D97757?logo=anthropic)](https://anthropic.com)
-[![Built with Kiro](https://img.shields.io/badge/IDE-Kiro_by_AWS-FF9900?style=flat&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiPjxwYXRoIGQ9Ik0xMiAyQzEyLjUgNi41IDE3LjUgMTEuNSAyMiAxMkMxNy41IDEyLjUgMTIuNSAxNy41IDEyIDIyQzExLjUgMTcuNSA2LjUgMTIuNSAyIDEyQzYuNSAxMS41IDExLjUgNi41IDEyIDJaIi8+PC9zdmc+&logoColor=white)](https://kiro.dev)
+[![Built with Kiro](https://img.shields.io/badge/IDE-Kiro_by_AWS-7B2FBE?style=flat&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiPjxwYXRoIGQ9Ik0xMiAyQzEyLjUgNi41IDE3LjUgMTEuNSAyMiAxMkMxNy41IDEyLjUgMTIuNSAxNy41IDEyIDIyQzExLjUgMTcuNSA2LjUgMTIuNSAyIDEyQzYuNSAxMS41IDExLjUgNi41IDEyIDJaIi8+PC9zdmc+&logoColor=white)](https://kiro.dev)
 [![Virginia-Tech CS](https://img.shields.io/badge/Virginia_Tech-CS-861F41)](https://github.com/Jerry-NotesHub/Virginia-Tech-Shields)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
