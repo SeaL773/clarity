@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/task_provider.dart';
+import '../services/notification_service.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -223,16 +224,74 @@ class SettingsScreen extends StatelessWidget {
 
             const SizedBox(height: 16),
 
+            // Reminders
+            _SettingsSection(
+              title: 'Reminders',
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            width: 34,
+                            height: 34,
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.primary.withValues(alpha: 0.08),
+                              borderRadius: BorderRadius.circular(9),
+                            ),
+                            child: Icon(Icons.notifications_outlined, size: 18,
+                                color: theme.colorScheme.primary.withValues(alpha: 0.6)),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Daily Check-in', style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500)),
+                                Text('Gentle reminder to plan your day', style: theme.textTheme.bodySmall?.copyWith(
+                                    color: theme.colorScheme.onSurface.withValues(alpha: 0.4))),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        child: FilledButton.tonal(
+                          onPressed: () async {
+                            await NotificationService().showTestNotification();
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: const Text('Notification sent! Check your notification tray.'),
+                                  behavior: SnackBarBehavior.floating,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                ),
+                              );
+                            }
+                          },
+                          style: FilledButton.styleFrom(
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                          child: const Text('Test Notification'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 16),
+
             // Coming soon
             _SettingsSection(
               title: 'Coming Soon',
               children: [
-                _SettingsTile(
-                  icon: Icons.notifications_outlined,
-                  title: 'Reminders',
-                  subtitle: 'Gentle nudges, not nagging',
-                  trailing: _ComingSoonBadge(),
-                ),
+
               ],
             ),
 

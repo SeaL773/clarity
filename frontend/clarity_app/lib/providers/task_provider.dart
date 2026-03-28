@@ -228,16 +228,39 @@ class TaskProvider extends ChangeNotifier {
     });
   }
 
+  // Celebration tracking
+  String? _celebration; // null = no celebration
+  String? get celebration => _celebration;
+  void clearCelebration() {
+    _celebration = null;
+    notifyListeners();
+  }
+
   void toggleTask(String taskId) {
     final idx = _tasks.indexWhere((t) => t.id == taskId);
     if (idx != -1) {
+      final wasAllDone = _tasks.every((t) => t.completed);
+      final completedBefore = completedCount;
+
       final newState = !_tasks[idx].completed;
-      // Create new sub-tasks list with updated completion
       final newSubs = _tasks[idx].subTasks
           .map((s) => s.copyWith(completed: newState))
           .toList();
       _tasks[idx] = _tasks[idx].copyWith(completed: newState, subTasks: newSubs);
       _sortTasks();
+
+      // Celebration checks
+      if (newState) {
+        final allDone = _tasks.every((t) => t.completed);
+        if (allDone && !wasAllDone && _tasks.length > 1) {
+          _celebration = 'all_done';
+        } else if (completedBefore == 0) {
+          _celebration = 'first_done';
+        } else if (completedCount == (_tasks.length / 2).ceil() && _tasks.length > 2) {
+          _celebration = 'halfway';
+        }
+      }
+
       notifyListeners();
       _api.saveTasks(todayDate, _tasks).catchError((e) {
         _error = 'Failed to save. Changes may be lost.';

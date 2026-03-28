@@ -40,6 +40,16 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     final provider = context.watch<TaskProvider>();
     final hasTasks = provider.tasks.isNotEmpty;
 
+    // Show celebration
+    if (provider.celebration != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && provider.celebration != null) {
+          _showCelebration(context, provider.celebration!);
+          provider.clearCelebration();
+        }
+      });
+    }
+
     // Auto-collapse input once after first tasks load
     if (hasTasks && _inputExpanded && !provider.isLoading && !_autoCollapsed) {
       _autoCollapsed = true;
@@ -362,6 +372,75 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     if (hour < 12) return 'Good morning';
     if (hour < 17) return 'Good afternoon';
     return 'Good evening';
+  }
+
+  void _showCelebration(BuildContext context, String type) {
+    final theme = Theme.of(context);
+    String emoji;
+    String message;
+
+    switch (type) {
+      case 'all_done':
+        emoji = '🎉';
+        message = 'All tasks complete! You crushed it today!';
+        break;
+      case 'first_done':
+        emoji = '⚡';
+        message = 'First one done! The hardest part is starting.';
+        break;
+      case 'halfway':
+        emoji = '🔥';
+        message = 'Halfway there! Keep the momentum going!';
+        break;
+      default:
+        return;
+    }
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isDismissible: true,
+      builder: (_) => Container(
+        margin: const EdgeInsets.all(20),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
+        decoration: BoxDecoration(
+          color: theme.brightness == Brightness.dark
+              ? const Color(0xFF252320)
+              : Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.1),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(emoji, style: const TextStyle(fontSize: 48)),
+            const SizedBox(height: 14),
+            Text(
+              message,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                height: 1.3,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 18),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Keep going'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   void _showClearDialog(BuildContext context) {
