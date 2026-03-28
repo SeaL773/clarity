@@ -127,20 +127,16 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 ),
               ),
 
-              // ── Input area (expandable) ──
-              AnimatedCrossFade(
-                firstChild: Padding(
+              // ── Input area (always visible when no tasks, collapsible when has tasks) ──
+              if (!hasTasks || _inputExpanded)
+                Padding(
                   padding: const EdgeInsets.fromLTRB(18, 12, 18, 6),
                   child: BrainDumpInput(
                     onCollapse: () => setState(() => _inputExpanded = false),
                   ),
-                ),
-                secondChild: const SizedBox(height: 8),
-                crossFadeState: _inputExpanded
-                    ? CrossFadeState.showFirst
-                    : CrossFadeState.showSecond,
-                duration: const Duration(milliseconds: 300),
-              ),
+                )
+              else
+                const SizedBox(height: 8),
 
               // ── Main content ──
               Expanded(
