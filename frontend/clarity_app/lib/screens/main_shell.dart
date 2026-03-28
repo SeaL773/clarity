@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'home_screen.dart';
+import 'calendar_screen.dart';
 import 'recap_screen.dart';
 import 'settings_screen.dart';
 
@@ -16,6 +17,7 @@ class _MainShellState extends State<MainShell> {
 
   final _pages = const [
     HomeScreen(),
+    CalendarScreen(),
     RecapScreen(),
     SettingsScreen(),
   ];
@@ -66,16 +68,22 @@ class _MainShellState extends State<MainShell> {
                         onTap: () => setState(() => _currentIndex = 0),
                       ),
                       _NavItem(
-                        icon: Icons.insights_rounded,
-                        label: 'Recap',
+                        icon: Icons.calendar_month_rounded,
+                        label: 'Calendar',
                         isActive: _currentIndex == 1,
                         onTap: () => setState(() => _currentIndex = 1),
                       ),
                       _NavItem(
-                        icon: Icons.settings_outlined,
-                        label: 'Settings',
+                        icon: Icons.insights_rounded,
+                        label: 'Recap',
                         isActive: _currentIndex == 2,
                         onTap: () => setState(() => _currentIndex = 2),
+                      ),
+                      _NavItem(
+                        icon: Icons.settings_outlined,
+                        label: 'Settings',
+                        isActive: _currentIndex == 3,
+                        onTap: () => setState(() => _currentIndex = 3),
                       ),
                     ],
                   ),

@@ -156,7 +156,7 @@ class SettingsScreen extends StatelessWidget {
                   icon: Icons.calendar_month_rounded,
                   title: 'Calendar View',
                   subtitle: 'See your tasks on a calendar',
-                  trailing: _ComingSoonBadge(),
+                  trailing: _DoneBadge(),
                 ),
                 _SettingsTile(
                   icon: Icons.notifications_outlined,
@@ -283,6 +283,21 @@ class _ComingSoonBadge extends StatelessWidget {
       ),
       child: Text('Soon',
           style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: Colors.orange.shade400)),
+    );
+  }
+}
+
+class _DoneBadge extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: Colors.green.shade50,
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text('Live',
+          style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: Colors.green.shade500)),
     );
   }
 }
