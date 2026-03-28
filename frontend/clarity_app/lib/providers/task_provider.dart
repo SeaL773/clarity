@@ -52,19 +52,7 @@ class TaskProvider extends ChangeNotifier {
       _tasks.addAll(newTasks);
 
       // Sort all tasks by priority (high→low), then by suggested order
-      const priorityOrder = {
-        'urgent_important': 0,
-        'urgent_not_important': 1,
-        'important_not_urgent': 2,
-        'neither': 3,
-      };
-      _tasks.sort((a, b) {
-        final aPri = priorityOrder[a.priority] ?? 3;
-        final bPri = priorityOrder[b.priority] ?? 3;
-        if (aPri != bPri) return aPri.compareTo(bPri);
-        // Same priority: keep AI's suggested order (stable sort)
-        return 0;
-      });
+      _sortTasks();
       _insights = result.insights;
       _totalEstimatedHours += result.totalEstimatedHours;
     } catch (e) {
@@ -73,6 +61,24 @@ class TaskProvider extends ChangeNotifier {
 
     _isLoading = false;
     notifyListeners();
+  }
+
+  static const _priorityOrder = {
+    'urgent_important': 0,
+    'urgent_not_important': 1,
+    'important_not_urgent': 2,
+    'neither': 3,
+  };
+
+  void _sortTasks() {
+    _tasks.sort((a, b) {
+      // Completed tasks go to the bottom
+      if (a.completed != b.completed) return a.completed ? 1 : -1;
+      // Then sort by priority
+      final aPri = _priorityOrder[a.priority] ?? 3;
+      final bPri = _priorityOrder[b.priority] ?? 3;
+      return aPri.compareTo(bPri);
+    });
   }
 
   void toggleTask(String taskId) {
@@ -84,6 +90,7 @@ class TaskProvider extends ChangeNotifier {
       for (var i = 0; i < _tasks[idx].subTasks.length; i++) {
         _tasks[idx].subTasks[i] = _tasks[idx].subTasks[i].copyWith(completed: newState);
       }
+      _sortTasks();
       notifyListeners();
       _api.saveTasks(todayDate, _tasks).catchError((_) {});
     }
@@ -109,6 +116,7 @@ class TaskProvider extends ChangeNotifier {
           _tasks[parentIdx] = _tasks[parentIdx].copyWith(completed: false);
         }
 
+        _sortTasks();
         notifyListeners();
         _api.saveTasks(todayDate, _tasks).catchError((_) {});
       }

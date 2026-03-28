@@ -18,7 +18,7 @@ class TaskCard extends StatelessWidget {
       case 'urgent_important':
         return Colors.red.shade200;
       case 'important_not_urgent':
-        return Colors.blue.shade200;
+        return Colors.blue.shade100;
       case 'urgent_not_important':
         return Colors.orange.shade200;
       default:
