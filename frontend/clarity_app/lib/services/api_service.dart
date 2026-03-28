@@ -1,9 +1,14 @@
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:dio/dio.dart';
 import '../models/task.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://10.0.2.2:8000'; // Android emulator → host localhost
-  // static const String baseUrl = 'http://localhost:8000'; // Web / Windows / iOS simulator
+  static String get baseUrl {
+    if (kIsWeb) return 'http://localhost:8000';
+    if (Platform.isAndroid) return 'http://10.0.2.2:8000';
+    return 'http://localhost:8000'; // iOS, Windows, macOS, Linux
+  }
 
   final Dio _dio = Dio(BaseOptions(
     baseUrl: baseUrl,

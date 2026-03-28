@@ -1,8 +1,8 @@
-fastapi
-uvicorn
-boto3
-pydantic
-python-dotenv
-aiosqlite
-openai
-httpx
+fastapi==0.135.2
+uvicorn==0.42.0
+boto3==1.42.78
+pydantic==2.12.5
+python-dotenv==1.2.2
+aiosqlite==0.22.1
+openai==2.30.0
+httpx==0.28.1

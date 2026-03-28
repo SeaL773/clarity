@@ -92,11 +92,11 @@ class TaskProvider extends ChangeNotifier {
     final idx = _tasks.indexWhere((t) => t.id == taskId);
     if (idx != -1) {
       final newState = !_tasks[idx].completed;
-      _tasks[idx] = _tasks[idx].copyWith(completed: newState);
-      // Complete/uncomplete all sub-tasks with parent
-      for (var i = 0; i < _tasks[idx].subTasks.length; i++) {
-        _tasks[idx].subTasks[i] = _tasks[idx].subTasks[i].copyWith(completed: newState);
-      }
+      // Create new sub-tasks list with updated completion
+      final newSubs = _tasks[idx].subTasks
+          .map((s) => s.copyWith(completed: newState))
+          .toList();
+      _tasks[idx] = _tasks[idx].copyWith(completed: newState, subTasks: newSubs);
       _sortTasks();
       notifyListeners();
       _api.saveTasks(todayDate, _tasks).catchError((_) {});
@@ -106,27 +106,20 @@ class TaskProvider extends ChangeNotifier {
   void toggleSubTask(String parentId, String subTaskId) {
     final parentIdx = _tasks.indexWhere((t) => t.id == parentId);
     if (parentIdx != -1) {
-      final subIdx =
-          _tasks[parentIdx].subTasks.indexWhere((t) => t.id == subTaskId);
-      if (subIdx != -1) {
-        final sub = _tasks[parentIdx].subTasks[subIdx];
-        _tasks[parentIdx].subTasks[subIdx] =
-            sub.copyWith(completed: !sub.completed);
+      final parent = _tasks[parentIdx];
+      final newSubs = parent.subTasks.map((s) {
+        if (s.id == subTaskId) return s.copyWith(completed: !s.completed);
+        return s;
+      }).toList();
 
-        // Auto-complete parent when all sub-tasks are done
-        final allSubsDone = _tasks[parentIdx].subTasks.every((s) => s.completed);
-        if (allSubsDone && !_tasks[parentIdx].completed) {
-          _tasks[parentIdx] = _tasks[parentIdx].copyWith(completed: true);
-        }
-        // Un-complete parent if a sub-task is unchecked
-        if (!allSubsDone && _tasks[parentIdx].completed) {
-          _tasks[parentIdx] = _tasks[parentIdx].copyWith(completed: false);
-        }
+      // Auto-complete parent when all sub-tasks are done
+      final allSubsDone = newSubs.every((s) => s.completed);
+      final parentCompleted = allSubsDone ? true : (newSubs.any((s) => !s.completed) ? false : parent.completed);
 
-        _sortTasks();
-        notifyListeners();
-        _api.saveTasks(todayDate, _tasks).catchError((_) {});
-      }
+      _tasks[parentIdx] = parent.copyWith(subTasks: newSubs, completed: parentCompleted);
+      _sortTasks();
+      notifyListeners();
+      _api.saveTasks(todayDate, _tasks).catchError((_) {});
     }
   }
 
@@ -150,6 +143,7 @@ class TaskProvider extends ChangeNotifier {
     _summary = null;
     _insights = null;
     _error = null;
+    _totalEstimatedHours = 0;
     notifyListeners();
   }
 }

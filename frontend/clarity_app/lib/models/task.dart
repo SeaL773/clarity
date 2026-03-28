@@ -1,15 +1,15 @@
 /// Task data model matching backend Pydantic schema.
 
 class Task {
-  String id;
-  String title;
-  String? description;
-  List<Task> subTasks;
-  String? priority; // urgent_important, important_not_urgent, urgent_not_important, neither
-  int? estimatedMinutes;
-  bool completed;
+  final String id;
+  final String title;
+  final String? description;
+  final List<Task> subTasks;
+  final String? priority;
+  final int? estimatedMinutes;
+  final bool completed;
 
-  Task({
+  const Task({
     required this.id,
     required this.title,
     this.description,
@@ -46,14 +46,22 @@ class Task {
     };
   }
 
-  Task copyWith({bool? completed}) {
+  Task copyWith({
+    String? id,
+    String? title,
+    String? description,
+    List<Task>? subTasks,
+    String? priority,
+    int? estimatedMinutes,
+    bool? completed,
+  }) {
     return Task(
-      id: id,
-      title: title,
-      description: description,
-      subTasks: subTasks,
-      priority: priority,
-      estimatedMinutes: estimatedMinutes,
+      id: id ?? this.id,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      subTasks: subTasks ?? this.subTasks,
+      priority: priority ?? this.priority,
+      estimatedMinutes: estimatedMinutes ?? this.estimatedMinutes,
       completed: completed ?? this.completed,
     );
   }
@@ -67,7 +75,7 @@ class DailySummary {
   final String encouragement;
   final List<String> tomorrowFocus;
 
-  DailySummary({
+  const DailySummary({
     required this.summary,
     required this.completedCount,
     required this.totalCount,
