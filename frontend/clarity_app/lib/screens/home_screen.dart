@@ -86,21 +86,41 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                         style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w700, letterSpacing: -0.3)),
                     const Spacer(),
-                    // Chat button (when input collapsed)
-                    if (!_inputExpanded && hasTasks)
-                      _IconChip(
-                        icon: Icons.chat_bubble_outline_rounded,
-                        onPressed: () => setState(() => _inputExpanded = true),
-                        tooltip: 'Add tasks',
-                      ),
-                    // Clear button
+                    // Grouped action pill
                     if (hasTasks)
-                      Padding(
-                        padding: const EdgeInsets.only(left: 6),
-                        child: _IconChip(
-                          icon: Icons.delete_outline_rounded,
-                          onPressed: () => _showClearDialog(context),
-                          tooltip: 'Clear all',
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.8),
+                          borderRadius: BorderRadius.circular(22),
+                          border: Border.all(color: Colors.grey.shade200.withValues(alpha: 0.5)),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.04),
+                              blurRadius: 10,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (!_inputExpanded)
+                              _PillIcon(
+                                icon: Icons.chat_bubble_outline_rounded,
+                                onPressed: () => setState(() => _inputExpanded = true),
+                              ),
+                            if (!_inputExpanded)
+                              Container(
+                                width: 1,
+                                height: 20,
+                                color: Colors.grey.shade200,
+                              ),
+                            _PillIcon(
+                              icon: Icons.delete_outline_rounded,
+                              onPressed: () => _showClearDialog(context),
+                            ),
+                          ],
                         ),
                       ),
                   ],
@@ -339,31 +359,26 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   }
 }
 
-// ── Icon chip button ──
+// ── Pill icon button ──
 
-class _IconChip extends StatelessWidget {
+class _PillIcon extends StatelessWidget {
   final IconData icon;
   final VoidCallback? onPressed;
-  final String? tooltip;
 
-  const _IconChip({required this.icon, this.onPressed, this.tooltip});
+  const _PillIcon({required this.icon, this.onPressed});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Tooltip(
-      message: tooltip ?? '',
-      child: Material(
-        color: theme.colorScheme.onSurface.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(10),
-        child: InkWell(
-          onTap: onPressed,
-          borderRadius: BorderRadius.circular(10),
-          child: Padding(
-            padding: const EdgeInsets.all(8),
-            child: Icon(icon, size: 20,
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.4)),
-          ),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(18),
+        child: Padding(
+          padding: const EdgeInsets.all(9),
+          child: Icon(icon, size: 19,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.45)),
         ),
       ),
     );
