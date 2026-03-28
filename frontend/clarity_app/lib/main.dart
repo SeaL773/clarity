@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'providers/task_provider.dart';
-import 'screens/home_screen.dart';
+import 'screens/main_shell.dart';
 
 void main() {
   runApp(const ClarityApp());
@@ -31,47 +31,15 @@ class ClarityApp extends StatelessWidget {
             bodyColor: const Color(0xFF1A1C1E),
             displayColor: const Color(0xFF1A1C1E),
           ),
-          cardTheme: CardThemeData(
-            elevation: 0,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            color: Colors.white,
-          ),
-          inputDecorationTheme: InputDecorationTheme(
-            filled: true,
-            fillColor: Colors.white,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide.none,
-            ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          ),
           filledButtonTheme: FilledButtonThemeData(
             style: FilledButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-              textStyle: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 15),
+              textStyle: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 14),
             ),
           ),
         ),
-        darkTheme: ThemeData(
-          useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color(0xFF5B7FBF),
-            brightness: Brightness.dark,
-            surface: const Color(0xFF111315),
-            onSurface: const Color(0xFFE3E3E3),
-          ),
-          scaffoldBackgroundColor: const Color(0xFF111315),
-          textTheme: GoogleFonts.interTextTheme(
-            ThemeData(brightness: Brightness.dark).textTheme,
-          ),
-          cardTheme: CardThemeData(
-            elevation: 0,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            color: const Color(0xFF1C1E21),
-          ),
-        ),
-        home: const HomeScreen(),
+        home: const MainShell(),
       ),
     );
   }
