@@ -33,7 +33,12 @@ class TaskProvider extends ChangeNotifier {
       _loadTestData();
     } else {
       testMonthData.clear();
-      clearTasks();
+      _tasks = [];
+      _summary = null;
+      _insights = null;
+      _error = null;
+      _totalEstimatedHours = 0;
+      notifyListeners();
       _loadTodayTasks();
     }
   }
@@ -60,23 +65,23 @@ class TaskProvider extends ChangeNotifier {
       {'title': 'Email professor', 'priority': 'urgent_not_important', 'dueTime': '10:30'},
       {'title': 'Buy groceries', 'priority': 'important_not_urgent', 'dueTime': '17:00'},
       {'title': 'Call mom', 'priority': 'important_not_urgent', 'dueTime': '19:00'},
-      {'title': 'Clean room', 'priority': 'neither', 'dueTime': null},
+      {'title': 'Clean room', 'priority': 'neither', 'dueTime': '23:59'},
       {'title': 'Group project meeting', 'priority': 'urgent_important', 'dueTime': '14:00'},
-      {'title': 'Do laundry', 'priority': 'neither', 'dueTime': null},
+      {'title': 'Do laundry', 'priority': 'neither', 'dueTime': '23:59'},
       {'title': 'Study for midterm', 'priority': 'urgent_important', 'dueTime': '20:00'},
       {'title': 'Renew parking permit', 'priority': 'urgent_not_important', 'dueTime': '16:00'},
-      {'title': 'Review resume', 'priority': 'important_not_urgent', 'dueTime': null},
+      {'title': 'Review resume', 'priority': 'important_not_urgent', 'dueTime': '23:59'},
       {'title': 'Apply for internship', 'priority': 'important_not_urgent', 'dueTime': '23:59'},
       {'title': 'Dentist appointment', 'priority': 'urgent_not_important', 'dueTime': '09:30'},
       {'title': 'Pick up package', 'priority': 'urgent_not_important', 'dueTime': '12:00'},
       {'title': 'Read chapter 5', 'priority': 'important_not_urgent', 'dueTime': '21:00'},
-      {'title': 'Fix bike tire', 'priority': 'neither', 'dueTime': null},
+      {'title': 'Fix bike tire', 'priority': 'neither', 'dueTime': '23:59'},
       {'title': 'Prepare presentation', 'priority': 'urgent_important', 'dueTime': '11:00'},
       {'title': 'Pay rent', 'priority': 'urgent_important', 'dueTime': '17:00'},
       {'title': 'Schedule advising', 'priority': 'important_not_urgent', 'dueTime': '15:00'},
       {'title': 'Return library books', 'priority': 'urgent_not_important', 'dueTime': '18:00'},
       {'title': 'Meal prep Sunday', 'priority': 'neither', 'dueTime': '10:00'},
-      {'title': 'Update LinkedIn', 'priority': 'neither', 'dueTime': null},
+      {'title': 'Update LinkedIn', 'priority': 'neither', 'dueTime': '23:59'},
       {'title': 'Office hours', 'priority': 'important_not_urgent', 'dueTime': '13:00'},
     ];
 

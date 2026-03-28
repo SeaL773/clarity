@@ -461,6 +461,23 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: theme.colorScheme.primary),
                     ),
                   ),
+                  const Spacer(),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(context, MaterialPageRoute(
+                        builder: (_) => CalendarDayScreen(date: _selectedDay, tasks: _selectedTasks),
+                      ));
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.05),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(Icons.open_in_full_rounded, size: 16,
+                          color: theme.colorScheme.onSurface.withValues(alpha: 0.4)),
+                    ),
+                  ),
                 ],
               ],
             ),

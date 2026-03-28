@@ -18,9 +18,35 @@ class RecapScreen extends StatelessWidget {
           // Header
           Padding(
             padding: const EdgeInsets.fromLTRB(22, 18, 22, 12),
-            child: Text('Daily Recap',
-                style: theme.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w700, letterSpacing: -0.3)),
+            child: Row(
+              children: [
+                Text('Daily Recap',
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.w700, letterSpacing: -0.3)),
+                const Spacer(),
+                if (provider.tasks.isNotEmpty && !provider.isLoading)
+                  GestureDetector(
+                    onTap: provider.getDailySummary,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primary.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.refresh_rounded, size: 14, color: theme.colorScheme.primary),
+                          const SizedBox(width: 4),
+                          Text('Regenerate',
+                              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500,
+                                  color: theme.colorScheme.primary)),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
 
           Expanded(

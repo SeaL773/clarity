@@ -50,11 +50,13 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       });
     }
 
-    // Auto-collapse input once after first tasks load
+    // Auto-collapse input once after first tasks load (not while loading)
     if (hasTasks && _inputExpanded && !provider.isLoading && !_autoCollapsed) {
       _autoCollapsed = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) setState(() => _inputExpanded = false);
+      Future.delayed(const Duration(milliseconds: 300), () {
+        if (mounted && !context.read<TaskProvider>().isLoading) {
+          setState(() => _inputExpanded = false);
+        }
       });
     }
 
@@ -249,7 +251,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         if (notification is ScrollUpdateNotification &&
             notification.scrollDelta != null &&
             notification.scrollDelta! > 2 &&
-            _inputExpanded) {
+            _inputExpanded &&
+            !provider.isLoading) {
           setState(() => _inputExpanded = false);
         }
         return false;
