@@ -42,7 +42,7 @@ class HomeScreen extends StatelessWidget {
                       _ActionButton(
                         icon: Icons.summarize_outlined,
                         label: 'Recap',
-                        onPressed: provider.isLoading ? null : provider.getDailySummary,
+                        onPressed: provider.isLoading ? null : () => _showRecap(context),
                       ),
                     if (provider.tasks.isNotEmpty)
                       Padding(
@@ -127,15 +127,6 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
 
-            // Daily summary card
-            if (provider.summary != null)
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
-                  child: SummaryCard(summary: provider.summary!),
-                ),
-              ),
-
             // Error
             if (provider.error != null)
               SliverToBoxAdapter(
@@ -207,6 +198,21 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
+  void _showRecap(BuildContext context) async {
+    final provider = context.read<TaskProvider>();
+
+    // Show loading sheet first
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => _RecapSheet(provider: provider),
+    );
+
+    // Fetch summary
+    await provider.getDailySummary();
+  }
+
   void _showClearDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -225,6 +231,82 @@ class HomeScreen extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _RecapSheet extends StatelessWidget {
+  final TaskProvider provider;
+
+  const _RecapSheet({required this.provider});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return ListenableBuilder(
+      listenable: provider,
+      builder: (context, _) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.85,
+          minChildSize: 0.5,
+          maxChildSize: 0.95,
+          builder: (context, scrollController) {
+            return Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              child: Column(
+                children: [
+                  // Handle bar
+                  Padding(
+                    padding: const EdgeInsets.only(top: 12, bottom: 8),
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  // Content
+                  Expanded(
+                    child: provider.isLoading && provider.summary == null
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                CircularProgressIndicator(
+                                  color: theme.colorScheme.primary,
+                                  strokeWidth: 3,
+                                ),
+                                const SizedBox(height: 16),
+                                Text('Generating your recap...',
+                                    style: theme.textTheme.bodyMedium?.copyWith(
+                                        color: theme.colorScheme.onSurface.withValues(alpha: 0.4))),
+                              ],
+                            ),
+                          )
+                        : provider.summary != null
+                            ? SingleChildScrollView(
+                                controller: scrollController,
+                                padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
+                                child: SummaryCard(summary: provider.summary!),
+                              )
+                            : Center(
+                                child: Text('Could not generate recap',
+                                    style: theme.textTheme.bodyMedium?.copyWith(
+                                        color: theme.colorScheme.onSurface.withValues(alpha: 0.4))),
+                              ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }
