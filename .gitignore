@@ -22,3 +22,10 @@ build/
 # OS
 .DS_Store
 Thumbs.db
+
+# Logs
+hs_err_pid*.log
+replay_pid*.log
+
+# Database
+*.db
