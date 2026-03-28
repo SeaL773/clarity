@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:dio/dio.dart';
 import '../models/speech_input_mode.dart';
 import '../providers/task_provider.dart';
+import '../services/api_service.dart';
 import '../services/speech_service.dart';
 
 class BrainDumpInput extends StatefulWidget {
@@ -15,6 +18,7 @@ class BrainDumpInput extends StatefulWidget {
 class _BrainDumpInputState extends State<BrainDumpInput> {
   final TextEditingController _controller = TextEditingController();
   final SpeechService _speechService = SpeechService();
+  final ApiService _apiService = ApiService();
   bool _isListening = false;
   bool _isTranscribing = false;
   bool _expanded = false;
@@ -117,6 +121,64 @@ class _BrainDumpInputState extends State<BrainDumpInput> {
     FocusScope.of(context).unfocus();
   }
 
+  Future<void> _pickAndUploadAudio() async {
+    setState(() {
+      _expanded = true;
+      _isTranscribing = true;
+      _speechError = null;
+    });
+
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['mp3', 'm4a', 'wav', 'aac', 'mp4', 'mpeg', 'mpga', 'webm'],
+        withData: true,
+      );
+
+      if (result == null || result.files.isEmpty) {
+        if (!mounted) return;
+        setState(() {
+          _isTranscribing = false;
+        });
+        return;
+      }
+
+      final file = result.files.single;
+      final text = await _apiService.transcribeAudioFile(
+        filename: file.name,
+        filePath: file.path,
+        bytes: file.bytes,
+      );
+
+      if (!mounted) return;
+      final currentText = _controller.text.trim();
+      final mergedText = currentText.isEmpty ? text : '$currentText $text';
+      _controller.text = mergedText;
+      _controller.selection = TextSelection.fromPosition(
+        TextPosition(offset: _controller.text.length),
+      );
+      setState(() {
+        _isTranscribing = false;
+        _speechError = null;
+      });
+    } on DioException catch (e) {
+      final detail = e.response?.data is Map<String, dynamic>
+          ? (e.response!.data['detail'] as String?)
+          : null;
+      if (!mounted) return;
+      setState(() {
+        _isTranscribing = false;
+        _speechError = detail ?? 'Audio upload failed';
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _isTranscribing = false;
+        _speechError = 'Audio upload failed';
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<TaskProvider>();
@@ -170,6 +232,15 @@ class _BrainDumpInputState extends State<BrainDumpInput> {
                       onPressed: isBusy ? null : _toggleListening,
                       size: 36,
                       iconSize: 20,
+                    ),
+                    const SizedBox(width: 4),
+                    _CircleButton(
+                      icon: Icons.audio_file_rounded,
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.35),
+                      bgColor: Colors.transparent,
+                      onPressed: isBusy ? null : _pickAndUploadAudio,
+                      size: 36,
+                      iconSize: 19,
                     ),
                     if (_isListening)
                       Padding(

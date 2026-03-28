@@ -67,11 +67,31 @@ class ApiService {
   }
 
   Future<String> transcribeAudio(String audioPath) async {
+    return transcribeAudioFile(
+      filename: path.basename(audioPath),
+      filePath: audioPath,
+    );
+  }
+
+  Future<String> transcribeAudioFile({
+    required String filename,
+    String? filePath,
+    List<int>? bytes,
+  }) async {
+    if (filePath == null && bytes == null) {
+      throw ArgumentError('Either filePath or bytes must be provided.');
+    }
+
     final formData = FormData.fromMap({
-      'file': await MultipartFile.fromFile(
-        audioPath,
-        filename: path.basename(audioPath),
-      ),
+      'file': filePath != null
+          ? await MultipartFile.fromFile(
+              filePath,
+              filename: filename,
+            )
+          : MultipartFile.fromBytes(
+              bytes!,
+              filename: filename,
+            ),
     });
 
     final response = await _dio.post(
