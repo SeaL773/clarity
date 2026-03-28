@@ -141,11 +141,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
   // Urgency → color: light mode uses blue shades, dark mode uses warm multi-color
   Color _urgencyColor(double score, bool isDark) {
     if (isDark) {
-      // Dark mode: warm multi-color (red → orange → blue → grey)
-      if (score > 0.66) return Color.lerp(const Color(0xFFFFB74D), const Color(0xFFE57373), (score - 0.66) / 0.34)!;
-      if (score > 0.33) return Color.lerp(const Color(0xFF7BAAF7), const Color(0xFFFFB74D), (score - 0.33) / 0.33)!;
-      if (score > 0) return Color.lerp(const Color(0xFFBDBDBD), const Color(0xFF7BAAF7), score / 0.33)!;
-      return const Color(0xFFBDBDBD);
+      // Dark mode: amber/yellow depth — brighter = more urgent
+      if (score > 0.66) return const Color(0xFFE8A817); // bright amber
+      if (score > 0.33) return const Color(0xFFC49530); // medium amber
+      if (score > 0) return const Color(0xFF8A7040);    // muted amber
+      return const Color(0xFF4A4230);                    // very dim amber-brown
     } else {
       // Light mode: blue depth — darker blue = more urgent
       if (score > 0.66) return const Color(0xFF2D5BA0); // deep blue
