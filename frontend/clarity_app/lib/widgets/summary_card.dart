@@ -14,7 +14,7 @@ class SummaryCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
-        color: const Color(0xFFF0F4FF),
+        color: theme.brightness == Brightness.dark ? const Color(0xFF1A1E25) : const Color(0xFFF0F4FF),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
@@ -71,7 +71,7 @@ class SummaryCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.7),
+              color: theme.brightness == Brightness.dark ? Colors.white.withValues(alpha: 0.08) : Colors.white.withValues(alpha: 0.7),
               borderRadius: BorderRadius.circular(14),
             ),
             child: Row(

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/task_provider.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -6,6 +8,7 @@ class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final provider = context.watch<TaskProvider>();
 
     return SafeArea(
       child: SingleChildScrollView(
@@ -64,6 +67,47 @@ class SettingsScreen extends StatelessWidget {
 
             const SizedBox(height: 16),
 
+            // Appearance
+            _SettingsSection(
+              title: 'Appearance',
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 34,
+                        height: 34,
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.primary.withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(9),
+                        ),
+                        child: Icon(Icons.dark_mode_outlined, size: 18,
+                            color: theme.colorScheme.primary.withValues(alpha: 0.6)),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Dark Mode', style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500)),
+                            Text('Easy on the eyes', style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.onSurface.withValues(alpha: 0.4))),
+                          ],
+                        ),
+                      ),
+                      Switch(
+                        value: provider.isDarkMode,
+                        onChanged: (_) => provider.toggleDarkMode(),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 16),
+
             // Coming soon
             _SettingsSection(
               title: 'Coming Soon',
@@ -72,12 +116,6 @@ class SettingsScreen extends StatelessWidget {
                   icon: Icons.calendar_month_rounded,
                   title: 'Calendar View',
                   subtitle: 'See your tasks on a calendar',
-                  trailing: _ComingSoonBadge(),
-                ),
-                _SettingsTile(
-                  icon: Icons.dark_mode_outlined,
-                  title: 'Dark Mode',
-                  subtitle: 'Easy on the eyes',
                   trailing: _ComingSoonBadge(),
                 ),
                 _SettingsTile(
@@ -126,7 +164,7 @@ class _SettingsSection extends StatelessWidget {
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF1E2024) : Colors.white,
             borderRadius: BorderRadius.circular(16),
           ),
           child: Column(

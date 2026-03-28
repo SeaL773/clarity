@@ -45,10 +45,14 @@ class _MainShellState extends State<MainShell> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.55),
+                    color: theme.brightness == Brightness.dark
+                        ? Colors.black.withValues(alpha: 0.45)
+                        : Colors.white.withValues(alpha: 0.55),
                     borderRadius: BorderRadius.circular(28),
                     border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.35),
+                      color: theme.brightness == Brightness.dark
+                          ? Colors.white.withValues(alpha: 0.1)
+                          : Colors.white.withValues(alpha: 0.35),
                       width: 0.5,
                     ),
                   ),

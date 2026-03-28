@@ -56,7 +56,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              const Color(0xFFEEF2FA),
+              theme.brightness == Brightness.dark ? const Color(0xFF1A1E25) : const Color(0xFFEEF2FA),
               theme.scaffoldBackgroundColor,
             ],
             stops: const [0.0, 0.35],

@@ -12,6 +12,13 @@ class TaskProvider extends ChangeNotifier {
   String? _insights;
   double _totalEstimatedHours = 0;
   DailySummary? _summary;
+  bool _isDarkMode = false;
+
+  bool get isDarkMode => _isDarkMode;
+  void toggleDarkMode() {
+    _isDarkMode = !_isDarkMode;
+    notifyListeners();
+  }
 
   List<Task> get tasks => _tasks;
   bool get isLoading => _isLoading;
