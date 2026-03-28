@@ -13,11 +13,51 @@ class TaskProvider extends ChangeNotifier {
   double _totalEstimatedHours = 0;
   DailySummary? _summary;
   bool _isDarkMode = false;
+  bool _isTestMode = false;
 
   bool get isDarkMode => _isDarkMode;
+  bool get isTestMode => _isTestMode;
+
   void toggleDarkMode() {
     _isDarkMode = !_isDarkMode;
     notifyListeners();
+  }
+
+  void toggleTestMode() {
+    _isTestMode = !_isTestMode;
+    if (_isTestMode) {
+      _loadTestData();
+    } else {
+      clearTasks();
+      _loadTodayTasks();
+    }
+  }
+
+  void _loadTestData() {
+    _tasks = _generateMockTasks();
+    _insights = "You've got a solid mix of priorities today — start with the quick wins!";
+    _sortTasks();
+    notifyListeners();
+  }
+
+  static List<Task> _generateMockTasks() {
+    return [
+      Task(id: 'mock-1', title: 'Email professor about extension', description: 'Ask about late submission policy', priority: 'urgent_important', completed: false),
+      Task(id: 'mock-2', title: 'Study for midterm', description: 'Chapters 4-7, focus on linked lists', priority: 'urgent_important', subTasks: [
+        Task(id: 'mock-2a', title: 'Review chapter 4 notes', completed: true),
+        Task(id: 'mock-2b', title: 'Practice problems ch 5-6', completed: false),
+        Task(id: 'mock-2c', title: 'Make flashcards for ch 7', completed: false),
+      ], completed: false),
+      Task(id: 'mock-3', title: 'Renew parking permit', description: 'Expires Friday', priority: 'urgent_not_important', completed: true),
+      Task(id: 'mock-4', title: 'Prepare slides for group meeting', description: 'Meeting tomorrow at 2pm', priority: 'urgent_not_important', completed: false),
+      Task(id: 'mock-5', title: 'Buy groceries', priority: 'important_not_urgent', subTasks: [
+        Task(id: 'mock-5a', title: 'Make a grocery list', completed: true),
+        Task(id: 'mock-5b', title: 'Go to store', completed: false),
+      ], completed: false),
+      Task(id: 'mock-6', title: 'Call mom back', priority: 'important_not_urgent', completed: true),
+      Task(id: 'mock-7', title: 'Go to the gym', description: 'Haven\'t gone in 2 weeks', priority: 'neither', completed: false),
+      Task(id: 'mock-8', title: 'Review Sarah\'s resume', priority: 'neither', completed: false),
+    ];
   }
 
   TaskProvider() {
@@ -55,6 +95,16 @@ class TaskProvider extends ChangeNotifier {
     _isLoading = true;
     _error = null;
     notifyListeners();
+
+    if (_isTestMode) {
+      await Future.delayed(const Duration(seconds: 1)); // simulate loading
+      _tasks.addAll(_generateMockTasks());
+      _insights = "Test mode: generated sample tasks from your input.";
+      _sortTasks();
+      _isLoading = false;
+      notifyListeners();
+      return;
+    }
 
     try {
       final result = await _api.process(text);

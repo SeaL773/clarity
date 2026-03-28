@@ -67,6 +67,81 @@ class SettingsScreen extends StatelessWidget {
 
             const SizedBox(height: 16),
 
+            // Mode
+            _SettingsSection(
+              title: 'Mode',
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 34,
+                        height: 34,
+                        decoration: BoxDecoration(
+                          color: Colors.orange.shade50,
+                          borderRadius: BorderRadius.circular(9),
+                        ),
+                        child: Icon(Icons.science_outlined, size: 18,
+                            color: Colors.orange.shade400),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Test Mode', style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500)),
+                            Text('Use mock data without backend', style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.onSurface.withValues(alpha: 0.4))),
+                          ],
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () => provider.toggleTestMode(),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 250),
+                          width: 50,
+                          height: 28,
+                          padding: const EdgeInsets.all(3),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(14),
+                            color: provider.isTestMode
+                                ? Colors.orange.shade400
+                                : theme.colorScheme.onSurface.withValues(alpha: 0.12),
+                          ),
+                          child: AnimatedAlign(
+                            duration: const Duration(milliseconds: 250),
+                            curve: Curves.easeOut,
+                            alignment: provider.isTestMode ? Alignment.centerRight : Alignment.centerLeft,
+                            child: Container(
+                              width: 22,
+                              height: 22,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.white,
+                                boxShadow: [
+                                  BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 4, offset: const Offset(0, 1)),
+                                ],
+                              ),
+                              child: Center(
+                                child: Icon(
+                                  provider.isTestMode ? Icons.science_rounded : Icons.cloud_outlined,
+                                  size: 13,
+                                  color: provider.isTestMode ? Colors.orange.shade400 : Colors.grey.shade400,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 16),
+
             // Appearance
             _SettingsSection(
               title: 'Appearance',

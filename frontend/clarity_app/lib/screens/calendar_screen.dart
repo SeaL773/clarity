@@ -6,6 +6,7 @@ import '../models/task.dart';
 import '../providers/task_provider.dart';
 import '../services/api_service.dart';
 import '../widgets/task_card.dart';
+import 'calendar_day_screen.dart';
 
 class CalendarScreen extends StatefulWidget {
   const CalendarScreen({super.key});
@@ -225,7 +226,18 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
                 ),
                 if (_selectedTasks.isNotEmpty) ...[
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 8),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(context, MaterialPageRoute(
+                        builder: (_) => CalendarDayScreen(date: _selectedDay, tasks: _selectedTasks),
+                      ));
+                    },
+                    child: Text('View all →',
+                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500,
+                            color: theme.colorScheme.primary.withValues(alpha: 0.6))),
+                  ),
+                  const Spacer(),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                     decoration: BoxDecoration(
