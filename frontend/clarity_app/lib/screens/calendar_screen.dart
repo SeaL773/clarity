@@ -133,6 +133,70 @@ class _CalendarScreenState extends State<CalendarScreen> {
     return const Color(0xFFBDBDBD);
   }
 
+  Widget _buildDayCell(BuildContext context, DateTime day, bool isToday, bool isSelected) {
+    final theme = Theme.of(context);
+    final key = _dateKey(day);
+    final tasks = _taskCache[key];
+    final hasTasks = tasks != null && tasks.isNotEmpty;
+
+    final urgency = hasTasks ? _urgencyScore(tasks!) : 0.0;
+    final completion = hasTasks ? _completionRate(tasks!) : 0.0;
+    final barColor = hasTasks ? _urgencyColor(urgency) : Colors.transparent;
+
+    return Container(
+      margin: const EdgeInsets.all(3),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // Day number
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: isSelected
+                  ? theme.colorScheme.primary
+                  : isToday
+                      ? theme.colorScheme.primary.withValues(alpha: 0.12)
+                      : Colors.transparent,
+            ),
+            child: Center(
+              child: Text(
+                '${day.day}',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: isToday || isSelected ? FontWeight.w600 : FontWeight.w400,
+                  color: isSelected
+                      ? Colors.white
+                      : isToday
+                          ? theme.colorScheme.primary
+                          : theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 2),
+          // Progress bar
+          SizedBox(
+            width: 28,
+            height: 3,
+            child: hasTasks
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(1.5),
+                    child: LinearProgressIndicator(
+                      value: completion,
+                      backgroundColor: barColor.withValues(alpha: 0.15),
+                      color: barColor.withValues(alpha: 0.8),
+                      minHeight: 3,
+                    ),
+                  )
+                : null,
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -209,34 +273,18 @@ class _CalendarScreenState extends State<CalendarScreen> {
               selectedTextStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
               defaultTextStyle: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.7), fontSize: 13),
               weekendTextStyle: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.5), fontSize: 13),
-              cellMargin: const EdgeInsets.all(4),
+              cellMargin: const EdgeInsets.all(2),
+              rowHeight: 48,
             ),
             calendarBuilders: CalendarBuilders(
-              markerBuilder: (context, day, _) {
-                final key = _dateKey(day);
-                final tasks = _taskCache[key];
-                if (tasks == null || tasks.isEmpty) return null;
-
-                final urgency = _urgencyScore(tasks);
-                final completion = _completionRate(tasks);
-                final color = _urgencyColor(urgency);
-
-                return Positioned(
-                  bottom: 4,
-                  child: SizedBox(
-                    width: 22,
-                    height: 3,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(1.5),
-                      child: LinearProgressIndicator(
-                        value: completion,
-                        backgroundColor: color.withValues(alpha: 0.2),
-                        color: color,
-                        minHeight: 3,
-                      ),
-                    ),
-                  ),
-                );
+              defaultBuilder: (context, day, focusedDay) {
+                return _buildDayCell(context, day, false, false);
+              },
+              todayBuilder: (context, day, focusedDay) {
+                return _buildDayCell(context, day, true, false);
+              },
+              selectedBuilder: (context, day, focusedDay) {
+                return _buildDayCell(context, day, false, true);
               },
             ),
           ),
