@@ -217,7 +217,17 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
   // ── Task list ──
   Widget _buildTaskList(BuildContext context, ThemeData theme, TaskProvider provider) {
-    return CustomScrollView(
+    return NotificationListener<ScrollNotification>(
+      onNotification: (notification) {
+        if (notification is ScrollUpdateNotification &&
+            notification.scrollDelta != null &&
+            notification.scrollDelta! > 2 &&
+            _inputExpanded) {
+          setState(() => _inputExpanded = false);
+        }
+        return false;
+      },
+      child: CustomScrollView(
       slivers: [
         // Insight
         if (provider.insights != null)
@@ -326,6 +336,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           ),
         ),
       ],
+      ),
     );
   }
 
