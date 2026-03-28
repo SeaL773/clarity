@@ -3,6 +3,7 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  record_windows
   speech_to_text_windows
 )
 

@@ -5,6 +5,7 @@ import 'package:table_calendar/table_calendar.dart';
 import '../models/task.dart';
 import '../providers/task_provider.dart';
 import '../services/api_service.dart';
+import '../theme/task_colors.dart';
 import 'calendar_day_screen.dart';
 
 class CalendarScreen extends StatefulWidget {
@@ -155,15 +156,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
     }
   }
 
-  Color _taskColor(String? priority) {
-    switch (priority) {
-      case 'urgent_important': return const Color(0xFFE57373);
-      case 'urgent_not_important': return const Color(0xFFFFB74D);
-      case 'important_not_urgent': return const Color(0xFF7BAAF7);
-      default: return const Color(0xFFBDBDBD);
-    }
-  }
-
   Widget _buildTimeline(ThemeData theme) {
     // Sort tasks: timed tasks first (by time), then untimed
     final timed = _selectedTasks.where((t) => t.dueTime != null).toList()
@@ -176,7 +168,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
       itemCount: sorted.length,
       itemBuilder: (context, index) {
         final task = sorted[index];
-        final color = _taskColor(task.priority);
+        final color = TaskColors.priorityAccent(task.priority);
         final isLast = index == sorted.length - 1;
 
         return IntrinsicHeight(
