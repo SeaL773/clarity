@@ -30,14 +30,19 @@ async def init_db():
 async def save_tasks(date: str, tasks: List[dict]):
     """Save tasks for a given date (upsert)."""
     async with aiosqlite.connect(DB_PATH) as db:
-        # Delete ALL tasks for this date, then insert fresh
-        await db.execute("DELETE FROM tasks WHERE date = ?", (date,))
-        for task in tasks:
-            await db.execute(
-                "INSERT OR REPLACE INTO tasks (id, date, data) VALUES (?, ?, ?)",
-                (task["id"], date, json.dumps(task)),
-            )
-        await db.commit()
+        # Atomic: delete + insert in a single transaction
+        await db.execute("BEGIN")
+        try:
+            await db.execute("DELETE FROM tasks WHERE date = ?", (date,))
+            for task in tasks:
+                await db.execute(
+                    "INSERT OR REPLACE INTO tasks (id, date, data) VALUES (?, ?, ?)",
+                    (task["id"], date, json.dumps(task)),
+                )
+            await db.execute("COMMIT")
+        except Exception:
+            await db.execute("ROLLBACK")
+            raise
 
 
 async def get_tasks(date: str) -> List[dict]:

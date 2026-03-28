@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
+import time
 from contextlib import asynccontextmanager
-from datetime import date
+from datetime import date, datetime
 from typing import List
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import get_tasks, init_db, save_tasks, update_task
@@ -52,6 +53,38 @@ app.add_middleware(
 
 
 # ──────────────────────────────────────────
+# Rate Limiting (simple in-memory)
+# ──────────────────────────────────────────
+
+_rate_limit: dict[str, list[float]] = {}
+RATE_LIMIT_MAX = 20  # requests per window
+RATE_LIMIT_WINDOW = 60  # seconds
+
+
+@app.middleware("http")
+async def rate_limit_middleware(request: Request, call_next):
+    if request.url.path.startswith("/api/") and request.method == "POST":
+        client_ip = request.client.host if request.client else "unknown"
+        now = time.time()
+        timestamps = _rate_limit.get(client_ip, [])
+        timestamps = [t for t in timestamps if now - t < RATE_LIMIT_WINDOW]
+        if len(timestamps) >= RATE_LIMIT_MAX:
+            raise HTTPException(status_code=429, detail="Too many requests. Please slow down.")
+        timestamps.append(now)
+        _rate_limit[client_ip] = timestamps
+    return await call_next(request)
+
+
+def _validate_date(task_date: str) -> str:
+    """Validate date string is YYYY-MM-DD format."""
+    try:
+        datetime.strptime(task_date, "%Y-%m-%d")
+        return task_date
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD.")
+
+
+# ──────────────────────────────────────────
 # Health Check
 # ──────────────────────────────────────────
 
@@ -70,7 +103,8 @@ async def api_parse(request: ParseRequest):
     try:
         return await parse_brain_dump(request)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"LLM error: {str(e)}")
+        print(f"[API] Parse error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to process your input. Please try again.")
 
 
 @app.post("/api/plan", response_model=PlanResponse)
@@ -79,7 +113,8 @@ async def api_plan(request: PlanRequest):
     try:
         return await plan_tasks(request)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"LLM error: {str(e)}")
+        print(f"[API] Plan error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to prioritize tasks. Please try again.")
 
 
 @app.post("/api/summarize", response_model=SummarizeResponse)
@@ -88,7 +123,8 @@ async def api_summarize(request: SummarizeRequest):
     try:
         return await summarize_day(request)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"LLM error: {str(e)}")
+        print(f"[API] Summarize error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to generate recap. Please try again.")
 
 
 # ──────────────────────────────────────────
@@ -98,6 +134,7 @@ async def api_summarize(request: SummarizeRequest):
 @app.get("/api/tasks/{task_date}")
 async def api_get_tasks(task_date: str):
     """Get all tasks for a date (YYYY-MM-DD)."""
+    _validate_date(task_date)
     tasks = await get_tasks(task_date)
     return {"date": task_date, "tasks": tasks}
 
@@ -105,8 +142,17 @@ async def api_get_tasks(task_date: str):
 @app.post("/api/tasks/{task_date}")
 async def api_save_tasks(task_date: str, tasks: List[Task]):
     """Save/update tasks for a date."""
+    _validate_date(task_date)
     await save_tasks(task_date, [t.model_dump() for t in tasks])
     return {"status": "saved", "date": task_date, "count": len(tasks)}
+
+
+@app.delete("/api/tasks/{task_date}")
+async def api_delete_tasks(task_date: str):
+    """Delete all tasks for a date."""
+    _validate_date(task_date)
+    await save_tasks(task_date, [])
+    return {"status": "deleted", "date": task_date}
 
 
 @app.patch("/api/tasks/{task_id}")

@@ -271,7 +271,7 @@ async def _call_bedrock(system_prompt: str, user_message: str) -> dict:
 
     # boto3 is sync, run in thread
     import asyncio
-    loop = asyncio.get_event_loop()
+    loop = asyncio.get_running_loop()
     response = await loop.run_in_executor(
         None,
         lambda: client.invoke_model(

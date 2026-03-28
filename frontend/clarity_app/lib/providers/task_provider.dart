@@ -20,6 +20,23 @@ class TaskProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  TaskProvider() {
+    _loadTodayTasks();
+  }
+
+  Future<void> _loadTodayTasks() async {
+    try {
+      final tasks = await _api.loadTasks(todayDate);
+      if (tasks.isNotEmpty) {
+        _tasks = tasks;
+        _sortTasks();
+        notifyListeners();
+      }
+    } catch (_) {
+      // Backend might not be running yet, ignore
+    }
+  }
+
   List<Task> get tasks => _tasks;
   bool get isLoading => _isLoading;
   String? get error => _error;
@@ -99,7 +116,10 @@ class TaskProvider extends ChangeNotifier {
       _tasks[idx] = _tasks[idx].copyWith(completed: newState, subTasks: newSubs);
       _sortTasks();
       notifyListeners();
-      _api.saveTasks(todayDate, _tasks).catchError((_) {});
+      _api.saveTasks(todayDate, _tasks).catchError((e) {
+        _error = 'Failed to save. Changes may be lost.';
+        notifyListeners();
+      });
     }
   }
 
@@ -114,12 +134,13 @@ class TaskProvider extends ChangeNotifier {
 
       // Auto-complete parent when all sub-tasks are done
       final allSubsDone = newSubs.every((s) => s.completed);
-      final parentCompleted = allSubsDone ? true : (newSubs.any((s) => !s.completed) ? false : parent.completed);
-
-      _tasks[parentIdx] = parent.copyWith(subTasks: newSubs, completed: parentCompleted);
+      _tasks[parentIdx] = parent.copyWith(subTasks: newSubs, completed: allSubsDone);
       _sortTasks();
       notifyListeners();
-      _api.saveTasks(todayDate, _tasks).catchError((_) {});
+      _api.saveTasks(todayDate, _tasks).catchError((e) {
+        _error = 'Failed to save. Changes may be lost.';
+        notifyListeners();
+      });
     }
   }
 
@@ -145,5 +166,7 @@ class TaskProvider extends ChangeNotifier {
     _error = null;
     _totalEstimatedHours = 0;
     notifyListeners();
+    // Also clear from backend DB
+    _api.saveTasks(todayDate, []).catchError((_) {});
   }
 }
