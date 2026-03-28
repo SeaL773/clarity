@@ -74,7 +74,8 @@ Each step has its own **dedicated prompt** designed for the task — not one gen
 | **Backend** | Python FastAPI | Async REST API with auto-docs |
 | **AI** | Anthropic Claude (Haiku 4.5) | Multi-step LLM pipeline |
 | **Database** | SQLite + aiosqlite | Lightweight async persistence |
-| **Voice** | speech_to_text | On-device speech recognition |
+| **Voice** | speech_to_text + OpenAI Whisper | On-device STT + cloud transcription |
+| **Audio** | record | Native audio recording for Whisper |
 | **Notifications** | flutter_local_notifications | Daily reminder system |
 | **Calendar** | table_calendar | Monthly view with task tracking |
 
@@ -103,6 +104,12 @@ Each step has its own **dedicated prompt** designed for the task — not one gen
 - **Completion ring** — Visual progress indicator
 - **Tomorrow's focus** — AI suggests what to carry over
 - **Dedicated recap screen** — Full-screen experience
+
+### Voice Input
+- **Dual mode speech** — On-device STT (instant) or OpenAI Whisper (accurate)
+- **Record + transcribe** — Native audio recording → server-side Whisper transcription
+- **Platform-aware** — Mobile uses native recording, web falls back gracefully
+- **Dev mode testing** — Bundled test audio files for Whisper verification
 
 ### Notifications & Celebrations
 - **Daily check-in reminder** — Toggle on/off, gentle morning notification
@@ -159,6 +166,7 @@ AWS_ACCESS_KEY_ID=...
 | `POST` | `/api/plan` | Tasks → prioritized plan |
 | `POST` | `/api/summarize` | Tasks → daily recap |
 | `POST` | `/api/process` | Full pipeline (parse + plan) |
+| `POST` | `/api/transcribe` | Audio file → Whisper transcription |
 | `GET` | `/api/tasks/{date}` | Get tasks for a date |
 | `POST` | `/api/tasks/{date}` | Save tasks for a date |
 | `DELETE` | `/api/tasks/{date}` | Delete tasks for a date |
@@ -173,6 +181,7 @@ clarity/
 │   │   ├── models.py            # Pydantic schemas
 │   │   ├── database.py          # SQLite with atomic transactions
 │   │   └── llm/
+│   │       ├── transcriber.py   # OpenAI Whisper audio transcription
 │   │       ├── client.py        # Multi-provider LLM client (Anthropic/Kiro/Bedrock/OpenAI)
 │   │       ├── parser.py        # Step 1: brain dump → tasks
 │   │       ├── planner.py       # Step 2: prioritize & order
@@ -201,7 +210,8 @@ clarity/
 │       │   └── settings_screen  # Dark mode, reminders, hidden dev mode
 │       ├── services/
 │       │   ├── api_service      # Platform-aware HTTP client (Android/Web/Desktop)
-│       │   ├── speech_service   # Voice input with error callbacks
+│       │   ├── speech_service   # Dual-mode voice (device STT + Whisper)
+│       │   ├── whisper_service  # Audio recording + Whisper transcription
 │       │   └── notification     # Local push notifications with custom icon
 │       └── widgets/
 │           ├── brain_dump_input # Collapsible text + voice input
