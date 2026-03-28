@@ -50,6 +50,21 @@ class TaskProvider extends ChangeNotifier {
 
       // Append new tasks to existing ones instead of replacing
       _tasks.addAll(newTasks);
+
+      // Sort all tasks by priority (high→low), then by suggested order
+      const priorityOrder = {
+        'urgent_important': 0,
+        'important_not_urgent': 1,
+        'urgent_not_important': 2,
+        'neither': 3,
+      };
+      _tasks.sort((a, b) {
+        final aPri = priorityOrder[a.priority] ?? 3;
+        final bPri = priorityOrder[b.priority] ?? 3;
+        if (aPri != bPri) return aPri.compareTo(bPri);
+        // Same priority: keep AI's suggested order (stable sort)
+        return 0;
+      });
       _insights = result.insights;
       _totalEstimatedHours += result.totalEstimatedHours;
     } catch (e) {

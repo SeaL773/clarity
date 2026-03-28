@@ -10,9 +10,9 @@ Given a list of tasks, your job is to:
 2. Ensure time estimates are reasonable (add them if missing)
 
 3. Suggest an optimal order, following these principles:
-   - Start with a quick win (< 10 min) to build momentum
-   - Then tackle the most important/urgent items
-   - Group similar tasks together
+   - Sort by priority first: urgent_important > important_not_urgent > urgent_not_important > neither
+   - Within the same priority level, put easier/quicker tasks first (quick wins build momentum)
+   - Consider workflow dependencies (e.g., "buy groceries" before "cook dinner")
    - Schedule breaks implicitly (don't create break tasks)
 
 4. If total estimated time exceeds available hours, flag which tasks to defer
