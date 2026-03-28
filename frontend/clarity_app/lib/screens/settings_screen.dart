@@ -96,9 +96,49 @@ class SettingsScreen extends StatelessWidget {
                           ],
                         ),
                       ),
-                      Switch(
-                        value: provider.isDarkMode,
-                        onChanged: (_) => provider.toggleDarkMode(),
+                      GestureDetector(
+                        onTap: () => provider.toggleDarkMode(),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 250),
+                          width: 50,
+                          height: 28,
+                          padding: const EdgeInsets.all(3),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(14),
+                            color: provider.isDarkMode
+                                ? theme.colorScheme.primary
+                                : theme.colorScheme.onSurface.withValues(alpha: 0.12),
+                          ),
+                          child: AnimatedAlign(
+                            duration: const Duration(milliseconds: 250),
+                            curve: Curves.easeOut,
+                            alignment: provider.isDarkMode ? Alignment.centerRight : Alignment.centerLeft,
+                            child: Container(
+                              width: 22,
+                              height: 22,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.white,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.1),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 1),
+                                  ),
+                                ],
+                              ),
+                              child: Center(
+                                child: Icon(
+                                  provider.isDarkMode ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
+                                  size: 13,
+                                  color: provider.isDarkMode
+                                      ? theme.colorScheme.primary
+                                      : Colors.orange.shade300,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
                     ],
                   ),
