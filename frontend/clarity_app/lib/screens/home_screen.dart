@@ -105,17 +105,17 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            if (!_inputExpanded)
-                              _PillIcon(
-                                icon: Icons.chat_bubble_outline_rounded,
-                                onPressed: () => setState(() => _inputExpanded = true),
-                              ),
-                            if (!_inputExpanded)
-                              Container(
-                                width: 1,
-                                height: 20,
-                                color: Colors.grey.shade200,
-                              ),
+                            _PillIcon(
+                              icon: _inputExpanded
+                                  ? Icons.keyboard_arrow_up_rounded
+                                  : Icons.chat_bubble_outline_rounded,
+                              onPressed: () => setState(() => _inputExpanded = !_inputExpanded),
+                            ),
+                            Container(
+                              width: 1,
+                              height: 20,
+                              color: Colors.grey.shade200,
+                            ),
                             _PillIcon(
                               icon: Icons.delete_outline_rounded,
                               onPressed: () => _showClearDialog(context),
