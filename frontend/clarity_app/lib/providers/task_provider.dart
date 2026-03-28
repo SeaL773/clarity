@@ -54,8 +54,8 @@ class TaskProvider extends ChangeNotifier {
       // Sort all tasks by priority (high→low), then by suggested order
       const priorityOrder = {
         'urgent_important': 0,
-        'important_not_urgent': 1,
-        'urgent_not_important': 2,
+        'urgent_not_important': 1,
+        'important_not_urgent': 2,
         'neither': 3,
       };
       _tasks.sort((a, b) {
