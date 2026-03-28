@@ -129,15 +129,15 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 ),
               ),
 
-              // ── Input area (always visible when no tasks, collapsible when has tasks) ──
-              if (!hasTasks || _inputExpanded)
+              // ── Input area (collapsible when has tasks, hidden on empty — shown inside empty state) ──
+              if (hasTasks && _inputExpanded)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(18, 12, 18, 6),
                   child: BrainDumpInput(
                     onCollapse: () => setState(() => _inputExpanded = false),
                   ),
                 )
-              else
+              else if (hasTasks)
                 const SizedBox(height: 8),
 
               // Error toast
@@ -180,33 +180,30 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   // ── Empty state ──
   Widget _buildEmpty(ThemeData theme) {
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 40),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.auto_awesome_rounded,
-                size: 40, color: theme.colorScheme.primary.withValues(alpha: 0.3)),
-            const SizedBox(height: 18),
-            Text(
-              _getGreeting(),
-              style: theme.textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.55),
-                letterSpacing: -0.5,
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 28),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.auto_awesome_rounded,
+                  size: 40, color: theme.colorScheme.primary.withValues(alpha: 0.3)),
+              const SizedBox(height: 18),
+              Text(
+                _getGreeting(),
+                style: theme.textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.55),
+                  letterSpacing: -0.5,
+                ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Type or speak what\'s on your mind.\nAI will organize it for you.',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.25),
-                height: 1.5,
+              const SizedBox(height: 24),
+              BrainDumpInput(
+                onCollapse: () {},
               ),
-              textAlign: TextAlign.center,
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
