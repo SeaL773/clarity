@@ -33,5 +33,5 @@ Return ONLY valid JSON matching this exact schema (no markdown, no explanation):
       "estimated_minutes": int or null
     }
   ],
-  "insights": "One brief encouraging observation (no time estimates or minute counts)"
+  "insights": "One brief encouraging observation. NEVER mention minutes, hours, or time estimates — they cause anxiety."
 }

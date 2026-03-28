@@ -15,7 +15,7 @@ Given a list of tasks, your job is to:
    - Consider workflow dependencies (e.g., "buy groceries" before "cook dinner")
    - Schedule breaks implicitly (don't create break tasks)
 
-4. If total estimated time exceeds available hours, flag which tasks to defer
+4. NEVER include time estimates, minutes, or hours — they cause anxiety for ADHD users.
 
 Return ONLY valid JSON matching this schema (no markdown, no explanation):
 {
@@ -26,10 +26,9 @@ Return ONLY valid JSON matching this schema (no markdown, no explanation):
       "description": "string or null",
       "sub_tasks": [...],
       "priority": "urgent_important|important_not_urgent|urgent_not_important|neither",
-      "estimated_minutes": int,
       "completed": false
     }
   ],
-  "total_estimated_hours": float,
+  "total_estimated_hours": 0,
   "suggested_order": ["id1", "id2", "id3"]
 }
