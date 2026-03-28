@@ -79,7 +79,9 @@ class SettingsScreen extends StatelessWidget {
                         width: 34,
                         height: 34,
                         decoration: BoxDecoration(
-                          color: Colors.orange.shade50,
+                          color: theme.brightness == Brightness.dark
+                              ? Colors.orange.shade400.withValues(alpha: 0.15)
+                              : Colors.orange.shade50,
                           borderRadius: BorderRadius.circular(9),
                         ),
                         child: Icon(Icons.science_outlined, size: 18,

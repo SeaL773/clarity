@@ -49,8 +49,9 @@ class TaskProvider extends ChangeNotifier {
   void _generateTestMonth() {
     testMonthData.clear();
     final now = DateTime.now();
+    // Generate current month + next month
     final firstDay = DateTime(now.year, now.month, 1);
-    final lastDay = DateTime(now.year, now.month + 1, 0);
+    final lastDay = DateTime(now.year, now.month + 2, 0);
 
     final taskTemplates = [
       {'title': 'Review lecture notes', 'priority': 'important_not_urgent'},
