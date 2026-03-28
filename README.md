@@ -4,7 +4,7 @@
 
 **AI-powered smart todo list for people who think faster than they organize.**
 
-*Just tell me what you need to do. I'll figure out the rest.*
+*Just tell me what you need to do. I'll figure out the rest!*
 
 [![Built with Flutter](https://img.shields.io/badge/Frontend-Flutter-02569B?logo=flutter)](https://flutter.dev)
 [![Powered by FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688?logo=fastapi)](https://fastapi.tiangolo.com)
