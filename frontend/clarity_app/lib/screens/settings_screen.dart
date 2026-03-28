@@ -79,13 +79,11 @@ class SettingsScreen extends StatelessWidget {
                         width: 34,
                         height: 34,
                         decoration: BoxDecoration(
-                          color: theme.brightness == Brightness.dark
-                              ? Colors.orange.shade400.withValues(alpha: 0.15)
-                              : Colors.orange.shade50,
+                          color: theme.colorScheme.primary.withValues(alpha: 0.08),
                           borderRadius: BorderRadius.circular(9),
                         ),
                         child: Icon(Icons.science_outlined, size: 18,
-                            color: Colors.orange.shade400),
+                            color: theme.colorScheme.primary.withValues(alpha: 0.6)),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -108,7 +106,7 @@ class SettingsScreen extends StatelessWidget {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(14),
                             color: provider.isTestMode
-                                ? Colors.orange.shade400
+                                ? theme.colorScheme.primary
                                 : theme.colorScheme.onSurface.withValues(alpha: 0.12),
                           ),
                           child: AnimatedAlign(
@@ -129,7 +127,7 @@ class SettingsScreen extends StatelessWidget {
                                 child: Icon(
                                   provider.isTestMode ? Icons.science_rounded : Icons.cloud_outlined,
                                   size: 13,
-                                  color: provider.isTestMode ? Colors.orange.shade400 : Colors.grey.shade400,
+                                  color: provider.isTestMode ? theme.colorScheme.primary : Colors.grey.shade400,
                                 ),
                               ),
                             ),
@@ -229,12 +227,6 @@ class SettingsScreen extends StatelessWidget {
             _SettingsSection(
               title: 'Coming Soon',
               children: [
-                _SettingsTile(
-                  icon: Icons.calendar_month_rounded,
-                  title: 'Calendar View',
-                  subtitle: 'See your tasks on a calendar',
-                  trailing: _DoneBadge(),
-                ),
                 _SettingsTile(
                   icon: Icons.notifications_outlined,
                   title: 'Reminders',
