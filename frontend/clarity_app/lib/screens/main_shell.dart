@@ -25,6 +25,7 @@ class _MainShellState extends State<MainShell> {
     final theme = Theme.of(context);
 
     return Scaffold(
+      extendBody: true,
       body: IndexedStack(
         index: _currentIndex,
         children: _pages,
