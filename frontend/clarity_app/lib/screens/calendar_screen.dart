@@ -372,6 +372,18 @@ class _CalendarScreenState extends State<CalendarScreen> {
             focusedDay: _focusedDay,
             selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
             onDaySelected: (selected, focused) {
+              // If tapping already selected day → navigate to detail
+              if (isSameDay(_selectedDay, selected)) {
+                final key = _dateKey(selected);
+                final tasks = _taskCache[key] ?? [];
+                if (tasks.isNotEmpty) {
+                  Navigator.push(context, MaterialPageRoute(
+                    builder: (_) => CalendarDayScreen(date: selected, tasks: tasks),
+                  ));
+                }
+                return;
+              }
+              // First tap → just switch timeline
               setState(() {
                 _selectedDay = selected;
                 _focusedDay = focused;
