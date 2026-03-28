@@ -25,59 +25,61 @@ class _MainShellState extends State<MainShell> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      extendBody: true,
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _pages,
-      ),
-      bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(40, 6, 40, 10),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(28),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.6),
-                  borderRadius: BorderRadius.circular(28),
-                  border: Border.all(color: Colors.white.withValues(alpha: 0.4)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.08),
-                      blurRadius: 24,
-                      offset: const Offset(0, 4),
+      body: Stack(
+        children: [
+          // Pages
+          IndexedStack(
+            index: _currentIndex,
+            children: _pages,
+          ),
+
+          // Floating frosted nav bar
+          Positioned(
+            left: 40,
+            right: 40,
+            bottom: MediaQuery.of(context).padding.bottom + 12,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(28),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.55),
+                    borderRadius: BorderRadius.circular(28),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.35),
+                      width: 0.5,
                     ),
-                  ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _NavItem(
+                        icon: Icons.home_rounded,
+                        label: 'Home',
+                        isActive: _currentIndex == 0,
+                        onTap: () => setState(() => _currentIndex = 0),
+                      ),
+                      _NavItem(
+                        icon: Icons.insights_rounded,
+                        label: 'Recap',
+                        isActive: _currentIndex == 1,
+                        onTap: () => setState(() => _currentIndex = 1),
+                      ),
+                      _NavItem(
+                        icon: Icons.settings_outlined,
+                        label: 'Settings',
+                        isActive: _currentIndex == 2,
+                        onTap: () => setState(() => _currentIndex = 2),
+                      ),
+                    ],
+                  ),
                 ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _NavItem(
-                  icon: Icons.home_rounded,
-                  label: 'Home',
-                  isActive: _currentIndex == 0,
-                  onTap: () => setState(() => _currentIndex = 0),
-                ),
-                _NavItem(
-                  icon: Icons.insights_rounded,
-                  label: 'Recap',
-                  isActive: _currentIndex == 1,
-                  onTap: () => setState(() => _currentIndex = 1),
-                ),
-                _NavItem(
-                  icon: Icons.settings_outlined,
-                  label: 'Settings',
-                  isActive: _currentIndex == 2,
-                  onTap: () => setState(() => _currentIndex = 2),
-                ),
-              ],
+              ),
             ),
           ),
-            ),
-          ),
-        ),
+        ],
       ),
     );
   }
