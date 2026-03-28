@@ -77,8 +77,7 @@ class SummaryCard extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('💙', style: TextStyle(fontSize: 18)),
-                const SizedBox(width: 10),
+                const SizedBox(width: 2),
                 Expanded(
                   child: Text(summary.encouragement,
                       style: theme.textTheme.bodyMedium?.copyWith(
