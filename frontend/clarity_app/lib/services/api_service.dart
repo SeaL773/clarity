@@ -1,6 +1,7 @@
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:dio/dio.dart';
+import 'package:path/path.dart' as path;
 import '../models/task.dart';
 
 class ApiService {
@@ -63,6 +64,47 @@ class ApiService {
     return (response.data['tasks'] as List)
         .map((t) => Task.fromJson(t as Map<String, dynamic>))
         .toList();
+  }
+
+  Future<String> transcribeAudio(String audioPath) async {
+    return transcribeAudioFile(
+      filename: path.basename(audioPath),
+      filePath: audioPath,
+    );
+  }
+
+  Future<String> transcribeAudioFile({
+    required String filename,
+    String? filePath,
+    List<int>? bytes,
+  }) async {
+    if (filePath == null && bytes == null) {
+      throw ArgumentError('Either filePath or bytes must be provided.');
+    }
+
+    final formData = FormData.fromMap({
+      'file': filePath != null
+          ? await MultipartFile.fromFile(
+              filePath,
+              filename: filename,
+            )
+          : MultipartFile.fromBytes(
+              bytes!,
+              filename: filename,
+            ),
+    });
+
+    final response = await _dio.post(
+      '/api/transcribe',
+      data: formData,
+      options: Options(
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      ),
+    );
+
+    return (response.data['text'] as String?)?.trim() ?? '';
   }
 }
 

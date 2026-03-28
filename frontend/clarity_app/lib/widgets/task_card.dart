@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/task.dart';
+import '../theme/task_colors.dart';
 
 class TaskCard extends StatelessWidget {
   final Task task;
@@ -13,24 +14,13 @@ class TaskCard extends StatelessWidget {
     required this.onToggleSubTask,
   });
 
-  Color _priorityAccent(String? priority) {
-    switch (priority) {
-      case 'urgent_important':
-        return const Color(0xFFE57373); // soft red
-      case 'urgent_not_important':
-        return const Color(0xFFFFB74D); // soft orange
-      case 'important_not_urgent':
-        return const Color(0xFF7BAAF7); // soft blue
-      default:
-        return const Color(0xFFBDBDBD); // grey
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final accent = task.completed ? (isDark ? const Color(0xFF3A3530) : const Color(0xFFD0D0D0)) : _priorityAccent(task.priority);
+    final accent = task.completed
+        ? TaskColors.completedAccent(isDark)
+        : TaskColors.priorityAccent(task.priority);
     final cardBg = task.completed
         ? (isDark ? const Color(0xFF1E1C18) : const Color(0xFFFAFAFA))
         : (isDark ? const Color(0xFF252320) : Colors.white);
@@ -123,7 +113,7 @@ class TaskCard extends StatelessWidget {
                             value: sub.completed,
                             onChanged: (_) => onToggleSubTask(sub.id),
                             shape: const CircleBorder(),
-                            activeColor: isDark ? const Color(0xFF5A5550) : const Color(0xFFBDBDBD),
+                            activeColor: TaskColors.subTaskCompletedAccent(isDark),
                             side: BorderSide(
                               color: theme.colorScheme.onSurface.withValues(alpha: 0.2),
                               width: 1.3,

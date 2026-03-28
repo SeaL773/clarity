@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../models/speech_input_mode.dart';
 import '../models/task.dart';
 import '../services/api_service.dart';
 
@@ -17,6 +18,7 @@ class TaskProvider extends ChangeNotifier {
 
   bool get isDarkMode => _isDarkMode;
   bool get isTestMode => _isTestMode;
+  SpeechInputMode get speechInputMode => defaultSpeechInputMode;
 
   void toggleDarkMode() {
     _isDarkMode = !_isDarkMode;

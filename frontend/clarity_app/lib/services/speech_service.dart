@@ -1,49 +1,59 @@
-import 'package:speech_to_text/speech_to_text.dart' as stt;
+import '../models/speech_input_mode.dart';
+import 'speech_to_text_service.dart';
+import 'whisper_speech_service.dart';
 
 class SpeechService {
-  final stt.SpeechToText _speech = stt.SpeechToText();
-  bool _isInitialized = false;
-  String? lastError;
+  final WhisperSpeechService _whisperService = WhisperSpeechService();
+  final SpeechToTextService _speechToTextService = SpeechToTextService();
 
-  bool get isListening => _speech.isListening;
-
-  Future<bool> initialize() async {
-    if (_isInitialized) return true;
-    _isInitialized = await _speech.initialize(
-      onError: (error) {
-        lastError = error.errorMsg;
-      },
-      onStatus: (status) {},
-    );
-    if (!_isInitialized) {
-      lastError = 'Speech recognition not available on this device';
-    }
-    return _isInitialized;
-  }
+  bool get isListening =>
+      _whisperService.isListening || _speechToTextService.isListening;
 
   Future<void> startListening({
+    required SpeechInputMode mode,
+    required void Function() onListeningStarted,
     required Function(String text) onResult,
     Function(String error)? onError,
   }) async {
-    if (!_isInitialized) {
-      final available = await initialize();
-      if (!available) {
-        onError?.call(lastError ?? 'Speech recognition unavailable');
-        return;
-      }
+    switch (mode) {
+      case SpeechInputMode.whisper:
+        await _whisperService.startListening(
+          onRecordingStarted: onListeningStarted,
+          onError: onError,
+        );
+        break;
+      case SpeechInputMode.device:
+        await _speechToTextService.startListening(
+          onListeningStarted: onListeningStarted,
+          onResult: onResult,
+          onError: onError,
+        );
+        break;
     }
-    await _speech.listen(
-      onResult: (result) {
-        onResult(result.recognizedWords);
-      },
-      listenFor: const Duration(seconds: 60),
-      pauseFor: const Duration(seconds: 3),
-      cancelOnError: true,
-      listenMode: stt.ListenMode.dictation,
-    );
   }
 
-  Future<void> stopListening() async {
-    await _speech.stop();
+  Future<void> stopListening({
+    required SpeechInputMode mode,
+    required Function(String text) onResult,
+    Function()? onProcessing,
+    Function(String error)? onError,
+  }) async {
+    switch (mode) {
+      case SpeechInputMode.whisper:
+        await _whisperService.stopListening(
+          onResult: onResult,
+          onProcessing: onProcessing,
+          onError: onError,
+        );
+        break;
+      case SpeechInputMode.device:
+        await _speechToTextService.stopListening();
+        break;
+    }
+  }
+
+  void dispose() {
+    _whisperService.dispose();
+    _speechToTextService.dispose();
   }
 }

@@ -8,13 +8,14 @@ from datetime import date, datetime
 from typing import List
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import get_tasks, init_db, save_tasks, update_task
 from app.llm.parser import parse_brain_dump
 from app.llm.planner import plan_tasks
 from app.llm.summarizer import summarize_day
+from app.llm.transcriber import transcribe_audio
 from app.models import (
     ParseRequest,
     ParseResponse,
@@ -125,6 +126,21 @@ async def api_summarize(request: SummarizeRequest):
     except Exception as e:
         print(f"[API] Summarize error: {e}")
         raise HTTPException(status_code=500, detail="Failed to generate recap. Please try again.")
+
+
+@app.post("/api/transcribe")
+async def api_transcribe(file: UploadFile = File(...)):
+    """Transcribe uploaded audio with OpenAI Whisper."""
+    try:
+        text = await transcribe_audio(file)
+        return {"text": text}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except RuntimeError as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    except Exception as e:
+        print(f"[API] Transcribe error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to transcribe audio. Please try again.")
 
 
 # ──────────────────────────────────────────
