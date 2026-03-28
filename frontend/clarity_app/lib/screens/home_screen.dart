@@ -14,117 +14,158 @@ class HomeScreen extends StatelessWidget {
     final provider = context.watch<TaskProvider>();
 
     return Scaffold(
-      backgroundColor: theme.colorScheme.surfaceContainerLowest,
-      appBar: AppBar(
-        title: Row(
-          children: [
-            const Icon(Icons.auto_awesome_rounded, size: 28),
-            const SizedBox(width: 8),
-            Text('Clarity',
-                style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
-          ],
-        ),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        actions: [
-          if (provider.tasks.isNotEmpty)
-            TextButton.icon(
-              onPressed: provider.isLoading ? null : provider.getDailySummary,
-              icon: const Icon(Icons.summarize_rounded, size: 20),
-              label: const Text('Recap'),
-            ),
-          if (provider.tasks.isNotEmpty)
-            IconButton(
-              onPressed: () => _showClearDialog(context),
-              icon: const Icon(Icons.delete_outline_rounded),
-              tooltip: 'Clear all',
-            ),
-        ],
-      ),
       body: SafeArea(
         child: CustomScrollView(
           slivers: [
+            // App bar — minimal, clean
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(24, 20, 24, 4),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Icon(Icons.auto_awesome_rounded,
+                          size: 20, color: theme.colorScheme.primary),
+                    ),
+                    const SizedBox(width: 10),
+                    Text('Clarity',
+                        style: theme.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w700, letterSpacing: -0.5)),
+                    const Spacer(),
+                    if (provider.tasks.isNotEmpty)
+                      _ActionButton(
+                        icon: Icons.summarize_outlined,
+                        label: 'Recap',
+                        onPressed: provider.isLoading ? null : provider.getDailySummary,
+                      ),
+                    if (provider.tasks.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(left: 6),
+                        child: IconButton(
+                          onPressed: () => _showClearDialog(context),
+                          icon: Icon(Icons.delete_outline_rounded,
+                              size: 20, color: theme.colorScheme.onSurface.withValues(alpha: 0.4)),
+                          tooltip: 'Clear all',
+                          style: IconButton.styleFrom(
+                            backgroundColor: theme.colorScheme.onSurface.withValues(alpha: 0.05),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+
+            // Brain dump input
             const SliverToBoxAdapter(
               child: Padding(
-                padding: EdgeInsets.fromLTRB(16, 8, 16, 16),
+                padding: EdgeInsets.fromLTRB(20, 16, 20, 8),
                 child: BrainDumpInput(),
               ),
             ),
+
+            // AI Insight
             if (provider.insights != null)
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
                   child: Container(
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.tertiaryContainer.withValues(alpha: 0.3),
+                      color: const Color(0xFFF0F4FF),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.lightbulb_outline_rounded, color: theme.colorScheme.tertiary, size: 20),
-                        const SizedBox(width: 8),
+                        Icon(Icons.lightbulb_outline_rounded,
+                            color: theme.colorScheme.primary.withValues(alpha: 0.6), size: 18),
+                        const SizedBox(width: 10),
                         Expanded(
                           child: Text(provider.insights!,
                               style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.onTertiaryContainer)),
+                                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                                  height: 1.4)),
                         ),
                       ],
                     ),
                   ),
                 ),
               ),
+
+            // Progress bar
             if (provider.tasks.isNotEmpty)
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                  padding: const EdgeInsets.fromLTRB(24, 8, 24, 12),
                   child: Row(
                     children: [
-                      Text('${provider.completedCount}/${provider.totalCount} done',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w600, color: theme.colorScheme.primary)),
-                      const SizedBox(width: 12),
+                      Text('${provider.completedCount} of ${provider.totalCount} done',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: theme.colorScheme.primary.withValues(alpha: 0.8))),
+                      const SizedBox(width: 14),
                       Expanded(
                         child: ClipRRect(
-                          borderRadius: BorderRadius.circular(4),
+                          borderRadius: BorderRadius.circular(6),
                           child: LinearProgressIndicator(
                             value: provider.completionRate,
-                            minHeight: 6,
-                            backgroundColor: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+                            minHeight: 5,
+                            backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.08),
+                            color: theme.colorScheme.primary.withValues(alpha: 0.6),
                           ),
                         ),
                       ),
-                      // Time estimate hidden — reduces pressure for ADHD users
                     ],
                   ),
                 ),
               ),
+
+            // Daily summary card
             if (provider.summary != null)
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
                   child: SummaryCard(summary: provider.summary!),
                 ),
               ),
+
+            // Error
             if (provider.error != null)
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                   child: Container(
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
                       color: Colors.red.shade50,
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(14),
                     ),
-                    child: Text(provider.error!, style: TextStyle(color: Colors.red.shade700)),
+                    child: Row(
+                      children: [
+                        Icon(Icons.error_outline_rounded, size: 18, color: Colors.red.shade400),
+                        const SizedBox(width: 10),
+                        Expanded(child: Text(provider.error!,
+                            style: TextStyle(color: Colors.red.shade700, fontSize: 13))),
+                      ],
+                    ),
                   ),
                 ),
               ),
+
+            // Task list
             if (provider.tasks.isNotEmpty)
               SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                sliver: SliverList.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                sliver: SliverList.separated(
                   itemCount: provider.tasks.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 6),
                   itemBuilder: (context, index) {
                     final task = provider.tasks[index];
                     return TaskCard(
@@ -135,27 +176,31 @@ class HomeScreen extends StatelessWidget {
                   },
                 ),
               ),
+
+            // Empty state
             if (provider.tasks.isEmpty && !provider.isLoading)
               SliverFillRemaining(
                 child: Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.psychology_outlined, size: 64,
-                          color: theme.colorScheme.onSurface.withValues(alpha: 0.2)),
+                      Icon(Icons.psychology_outlined, size: 56,
+                          color: theme.colorScheme.onSurface.withValues(alpha: 0.12)),
                       const SizedBox(height: 16),
-                      Text('Brain dump your thoughts above',
-                          style: theme.textTheme.bodyLarge?.copyWith(
-                              color: theme.colorScheme.onSurface.withValues(alpha: 0.4))),
-                      const SizedBox(height: 4),
-                      Text('AI will organize them into tasks',
+                      Text("What's on your mind?",
+                          style: theme.textTheme.titleMedium?.copyWith(
+                              color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
+                              fontWeight: FontWeight.w500)),
+                      const SizedBox(height: 6),
+                      Text('Type or speak — AI handles the rest',
                           style: theme.textTheme.bodyMedium?.copyWith(
-                              color: theme.colorScheme.onSurface.withValues(alpha: 0.3))),
+                              color: theme.colorScheme.onSurface.withValues(alpha: 0.2))),
                     ],
                   ),
                 ),
               ),
-            const SliverToBoxAdapter(child: SizedBox(height: 32)),
+
+            const SliverToBoxAdapter(child: SizedBox(height: 40)),
           ],
         ),
       ),
@@ -166,6 +211,7 @@ class HomeScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Text('Clear all tasks?'),
         content: const Text('This will remove all tasks for today.'),
         actions: [
@@ -178,6 +224,30 @@ class HomeScreen extends StatelessWidget {
             child: const Text('Clear'),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ActionButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback? onPressed;
+
+  const _ActionButton({required this.icon, required this.label, this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return TextButton.icon(
+      onPressed: onPressed,
+      icon: Icon(icon, size: 18),
+      label: Text(label, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
+      style: TextButton.styleFrom(
+        foregroundColor: theme.colorScheme.primary,
+        backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.06),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       ),
     );
   }

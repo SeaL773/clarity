@@ -13,131 +13,117 @@ class TaskCard extends StatelessWidget {
     required this.onToggleSubTask,
   });
 
-  Color _priorityColor(String? priority) {
+  Color _priorityAccent(String? priority) {
     switch (priority) {
       case 'urgent_important':
-        return Colors.red.shade200;
-      case 'important_not_urgent':
-        return Colors.blue.shade100;
+        return const Color(0xFFE57373); // soft red
       case 'urgent_not_important':
-        return Colors.orange.shade200;
-      default:
-        return Colors.grey.shade200;
-    }
-  }
-
-  IconData _priorityIcon(String? priority) {
-    switch (priority) {
-      case 'urgent_important':
-        return Icons.priority_high_rounded;
+        return const Color(0xFFFFB74D); // soft orange
       case 'important_not_urgent':
-        return Icons.schedule_rounded;
-      case 'urgent_not_important':
-        return Icons.flash_on_rounded;
+        return const Color(0xFF7BAAF7); // soft blue
       default:
-        return Icons.remove_rounded;
+        return const Color(0xFFBDBDBD); // grey
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final accent = task.completed ? const Color(0xFFD0D0D0) : _priorityAccent(task.priority);
 
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      margin: const EdgeInsets.symmetric(vertical: 4),
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.easeOut,
       decoration: BoxDecoration(
-        color: task.completed
-            ? theme.colorScheme.surfaceContainerLowest.withValues(alpha: 0.5)
-            : theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: task.completed
-              ? theme.colorScheme.outline.withValues(alpha: 0.1)
-              : _priorityColor(task.priority),
-          width: 2,
+        color: task.completed ? const Color(0xFFFAFAFA) : Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border(
+          left: BorderSide(color: accent, width: 3.5),
         ),
-        boxShadow: task.completed
-            ? []
-            : [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.04),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-            leading: Checkbox(
-              value: task.completed,
-              onChanged: (_) => onToggle(),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(6),
-              ),
+          // Main task row
+          Padding(
+            padding: const EdgeInsets.fromLTRB(6, 6, 14, 6),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 2),
+                  child: Transform.scale(
+                    scale: 1.1,
+                    child: Checkbox(
+                      value: task.completed,
+                      onChanged: (_) => onToggle(),
+                      shape: const CircleBorder(),
+                      activeColor: accent,
+                      side: BorderSide(color: accent, width: 1.8),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 10),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          task.title,
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            height: 1.3,
+                            decoration: task.completed ? TextDecoration.lineThrough : null,
+                            color: task.completed
+                                ? theme.colorScheme.onSurface.withValues(alpha: 0.35)
+                                : theme.colorScheme.onSurface,
+                          ),
+                        ),
+                        if (task.description != null) ...[
+                          const SizedBox(height: 3),
+                          Text(
+                            task.description!,
+                            style: TextStyle(
+                              fontSize: 13,
+                              height: 1.4,
+                              color: task.completed
+                                  ? theme.colorScheme.onSurface.withValues(alpha: 0.2)
+                                  : theme.colorScheme.onSurface.withValues(alpha: 0.45),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
-            title: Text(
-              task.title,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                decoration: task.completed ? TextDecoration.lineThrough : null,
-                color: task.completed
-                    ? theme.colorScheme.onSurface.withValues(alpha: 0.4)
-                    : theme.colorScheme.onSurface,
-              ),
-            ),
-            subtitle: task.description != null
-                ? Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Text(
-                      task.description!,
-                      style: TextStyle(
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                        fontSize: 13,
-                      ),
-                    ),
-                  )
-                : null,
-            trailing: task.priority != null
-                ? Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      color: task.completed
-                          ? Colors.grey.shade200
-                          : _priorityColor(task.priority),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(
-                      _priorityIcon(task.priority),
-                      size: 16,
-                      color: task.completed
-                          ? Colors.grey.shade400
-                          : null,
-                    ),
-                  )
-                : null,
           ),
+
+          // Sub-tasks
           if (task.subTasks.isNotEmpty)
             Padding(
-              padding: const EdgeInsets.only(left: 48, right: 16, bottom: 12),
+              padding: const EdgeInsets.only(left: 52, right: 14, bottom: 10),
               child: Column(
                 children: task.subTasks.map((sub) {
                   return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 2),
+                    padding: const EdgeInsets.symmetric(vertical: 1),
                     child: Row(
                       children: [
                         SizedBox(
-                          width: 24,
-                          height: 24,
+                          width: 22,
+                          height: 22,
                           child: Checkbox(
                             value: sub.completed,
                             onChanged: (_) => onToggleSubTask(sub.id),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                            shape: const CircleBorder(),
+                            activeColor: const Color(0xFFBDBDBD),
+                            side: BorderSide(
+                              color: theme.colorScheme.onSurface.withValues(alpha: 0.2),
+                              width: 1.3,
+                            ),
                             visualDensity: VisualDensity.compact,
                           ),
                         ),
@@ -146,11 +132,12 @@ class TaskCard extends StatelessWidget {
                           child: Text(
                             sub.title,
                             style: TextStyle(
-                              fontSize: 14,
+                              fontSize: 13.5,
+                              height: 1.4,
                               decoration: sub.completed ? TextDecoration.lineThrough : null,
                               color: sub.completed
-                                  ? theme.colorScheme.onSurface.withValues(alpha: 0.3)
-                                  : theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                                  ? theme.colorScheme.onSurface.withValues(alpha: 0.25)
+                                  : theme.colorScheme.onSurface.withValues(alpha: 0.6),
                             ),
                           ),
                         ),

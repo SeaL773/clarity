@@ -52,110 +52,80 @@ class _BrainDumpInputState extends State<BrainDumpInput> {
     final theme = Theme.of(context);
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.06)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            "What's on your mind?",
-            style: theme.textTheme.titleMedium?.copyWith(
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-            ),
-          ),
-          const SizedBox(height: 8),
           TextField(
             controller: _controller,
-            maxLines: 4,
+            maxLines: 3,
             minLines: 2,
             enabled: !isLoading,
+            style: theme.textTheme.bodyLarge?.copyWith(height: 1.5),
             decoration: InputDecoration(
-              hintText: 'Just dump everything here... tasks, thoughts, worries, plans...',
+              hintText: 'Just dump everything here...\ntasks, thoughts, worries, plans...',
               hintStyle: TextStyle(
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.25),
+                height: 1.5,
               ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(
-                  color: theme.colorScheme.outline.withValues(alpha: 0.2),
-                ),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(
-                  color: theme.colorScheme.outline.withValues(alpha: 0.2),
-                ),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(
-                  color: theme.colorScheme.primary,
-                  width: 2,
-                ),
-              ),
-              filled: true,
-              fillColor: theme.colorScheme.surfaceContainerLowest,
+              border: InputBorder.none,
+              filled: false,
+              contentPadding: EdgeInsets.zero,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
           Row(
             children: [
-              IconButton.filled(
-                onPressed: isLoading ? null : _toggleListening,
-                icon: Icon(
-                  _isListening ? Icons.stop_rounded : Icons.mic_rounded,
+              // Mic button
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: _isListening
+                      ? Colors.red.shade50
+                      : theme.colorScheme.onSurface.withValues(alpha: 0.04),
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                style: IconButton.styleFrom(
-                  backgroundColor: _isListening
-                      ? Colors.red.shade100
-                      : theme.colorScheme.secondaryContainer,
-                  foregroundColor: _isListening
-                      ? Colors.red
-                      : theme.colorScheme.onSecondaryContainer,
+                child: IconButton(
+                  onPressed: isLoading ? null : _toggleListening,
+                  icon: Icon(
+                    _isListening ? Icons.stop_rounded : Icons.mic_rounded,
+                    size: 20,
+                    color: _isListening ? Colors.red.shade400 : theme.colorScheme.onSurface.withValues(alpha: 0.4),
+                  ),
+                  tooltip: _isListening ? 'Stop listening' : 'Voice input',
+                  padding: EdgeInsets.zero,
                 ),
-                tooltip: _isListening ? 'Stop listening' : 'Voice input',
               ),
               if (_isListening)
                 Padding(
-                  padding: const EdgeInsets.only(left: 8),
+                  padding: const EdgeInsets.only(left: 10),
                   child: Text(
                     'Listening...',
                     style: TextStyle(
                       color: Colors.red.shade400,
                       fontWeight: FontWeight.w500,
+                      fontSize: 13,
                     ),
                   ),
                 ),
               const Spacer(),
+              // Submit button
               FilledButton.icon(
                 onPressed: isLoading ? null : _submit,
                 icon: isLoading
                     ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                       )
-                    : const Icon(Icons.auto_awesome_rounded),
+                    : const Icon(Icons.auto_awesome_rounded, size: 18),
                 label: Text(isLoading ? 'Thinking...' : 'Clarity'),
-                style: FilledButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
               ),
             ],
           ),

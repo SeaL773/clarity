@@ -12,16 +12,9 @@ class SummaryCard extends StatelessWidget {
     final pct = (summary.completionRate * 100).round();
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            theme.colorScheme.primaryContainer,
-            theme.colorScheme.secondaryContainer,
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: const Color(0xFFF0F4FF),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
@@ -29,71 +22,93 @@ class SummaryCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.auto_awesome_rounded, size: 24),
+              Icon(Icons.auto_awesome_rounded, size: 20,
+                  color: theme.colorScheme.primary.withValues(alpha: 0.7)),
               const SizedBox(width: 8),
               Text('Daily Recap',
-                  style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                  style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700, letterSpacing: -0.3)),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 18),
+          // Progress ring
           Center(
             child: Stack(
               alignment: Alignment.center,
               children: [
                 SizedBox(
-                  width: 80,
-                  height: 80,
+                  width: 72,
+                  height: 72,
                   child: CircularProgressIndicator(
                     value: summary.completionRate,
-                    strokeWidth: 8,
-                    backgroundColor: theme.colorScheme.onSurface.withValues(alpha: 0.1),
-                    color: pct >= 70 ? Colors.green : pct >= 40 ? Colors.orange : theme.colorScheme.primary,
+                    strokeWidth: 6,
+                    strokeCap: StrokeCap.round,
+                    backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.08),
+                    color: pct >= 70
+                        ? const Color(0xFF66BB6A)
+                        : pct >= 40
+                            ? const Color(0xFFFFB74D)
+                            : theme.colorScheme.primary,
                   ),
                 ),
                 Text('$pct%',
-                    style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
+                    style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w700, letterSpacing: -0.5)),
               ],
             ),
           ),
           const SizedBox(height: 8),
           Center(
             child: Text('${summary.completedCount} of ${summary.totalCount} tasks completed',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6))),
+                style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.5))),
           ),
-          const SizedBox(height: 16),
-          Text(summary.summary, style: theme.textTheme.bodyLarge),
-          const SizedBox(height: 12),
+          const SizedBox(height: 18),
+          Text(summary.summary,
+              style: theme.textTheme.bodyMedium?.copyWith(height: 1.5)),
+          const SizedBox(height: 14),
+          // Encouragement
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: theme.colorScheme.surface.withValues(alpha: 0.5),
-              borderRadius: BorderRadius.circular(12),
+              color: Colors.white.withValues(alpha: 0.7),
+              borderRadius: BorderRadius.circular(14),
             ),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('💙', style: TextStyle(fontSize: 20)),
-                const SizedBox(width: 8),
+                const Text('💙', style: TextStyle(fontSize: 18)),
+                const SizedBox(width: 10),
                 Expanded(
                   child: Text(summary.encouragement,
-                      style: theme.textTheme.bodyMedium?.copyWith(fontStyle: FontStyle.italic)),
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                          fontStyle: FontStyle.italic, height: 1.4)),
                 ),
               ],
             ),
           ),
           if (summary.tomorrowFocus.isNotEmpty) ...[
             const SizedBox(height: 16),
-            Text("Tomorrow's Focus:",
-                style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600)),
+            Text("Tomorrow's Focus",
+                style: theme.textTheme.labelLarge?.copyWith(
+                    fontWeight: FontWeight.w600, letterSpacing: -0.2)),
             const SizedBox(height: 8),
             ...summary.tomorrowFocus.map(
               (item) => Padding(
-                padding: const EdgeInsets.only(bottom: 4),
+                padding: const EdgeInsets.only(bottom: 5),
                 child: Row(
                   children: [
-                    Icon(Icons.arrow_forward_rounded, size: 16, color: theme.colorScheme.primary),
-                    const SizedBox(width: 8),
-                    Expanded(child: Text(item)),
+                    Container(
+                      width: 5,
+                      height: 5,
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primary.withValues(alpha: 0.5),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(child: Text(item,
+                        style: theme.textTheme.bodyMedium?.copyWith(height: 1.4))),
                   ],
                 ),
               ),
