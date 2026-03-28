@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'providers/task_provider.dart';
-import 'screens/main_shell.dart';
+import 'screens/splash_screen.dart';
 
 void main() {
   runApp(const ClarityApp());
@@ -23,7 +23,7 @@ class ClarityApp extends StatelessWidget {
             themeMode: provider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
             theme: _lightTheme(),
             darkTheme: _darkTheme(),
-            home: const MainShell(),
+            home: const SplashScreen(),
           );
         },
       ),
