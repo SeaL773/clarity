@@ -107,10 +107,18 @@ class TaskCard extends StatelessWidget {
                     width: 32,
                     height: 32,
                     decoration: BoxDecoration(
-                      color: _priorityColor(task.priority),
+                      color: task.completed
+                          ? Colors.grey.shade200
+                          : _priorityColor(task.priority),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Icon(_priorityIcon(task.priority), size: 16),
+                    child: Icon(
+                      _priorityIcon(task.priority),
+                      size: 16,
+                      color: task.completed
+                          ? Colors.grey.shade400
+                          : null,
+                    ),
                   )
                 : null,
           ),
