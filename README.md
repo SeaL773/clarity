@@ -9,6 +9,7 @@
 [![Built with Flutter](https://img.shields.io/badge/Frontend-Flutter-02569B?logo=flutter)](https://flutter.dev)
 [![Powered by FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688?logo=fastapi)](https://fastapi.tiangolo.com)
 [![AI by Claude](https://img.shields.io/badge/AI-Claude_Haiku_4.5-D97757?logo=anthropic)](https://anthropic.com)
+[![Virginia-Tech CS](https://img.shields.io/badge/Virginia_Tech-CS-861F41)](https://github.com/Jerry-NotesHub/Virginia-Tech-Shields)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 </div>
