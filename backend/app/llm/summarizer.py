@@ -20,11 +20,16 @@ async def summarize_day(request: SummarizeRequest) -> SummarizeResponse:
 
     result = await call_llm(SUMMARIZE_PROMPT, user_message)
 
+    # Calculate real counts from actual task data, don't trust AI numbers
+    completed = sum(1 for t in request.tasks if t.completed)
+    total = len(request.tasks)
+    rate = completed / total if total > 0 else 0.0
+
     return SummarizeResponse(
         summary=result.get("summary", ""),
-        completed_count=result.get("completed_count", 0),
-        total_count=result.get("total_count", 0),
-        completion_rate=result.get("completion_rate", 0.0),
+        completed_count=completed,
+        total_count=total,
+        completion_rate=rate,
         encouragement=result.get("encouragement", ""),
         tomorrow_focus=result.get("tomorrow_focus", []),
     )
