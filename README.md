@@ -9,6 +9,7 @@
 [![Built with Flutter](https://img.shields.io/badge/Frontend-Flutter-02569B?logo=flutter)](https://flutter.dev)
 [![Powered by FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688?logo=fastapi)](https://fastapi.tiangolo.com)
 [![AI by Claude](https://img.shields.io/badge/AI-Claude_Haiku_4.5-D97757?logo=anthropic)](https://anthropic.com)
+[![Built with Kiro](https://img.shields.io/badge/Built_with-Kiro_IDE-FF9900?logo=amazonaws&logoColor=white)](https://kiro.dev)
 [![Virginia-Tech CS](https://img.shields.io/badge/Virginia_Tech-CS-861F41)](https://github.com/Jerry-NotesHub/Virginia-Tech-Shields)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
@@ -83,10 +84,12 @@ Each step has its own **dedicated prompt** designed for the task — not one gen
 
 ### Calendar
 - **Monthly calendar view** — See all your tasks at a glance
-- **Urgency progress bars** — Each day shows a color-coded bar (deeper = more urgent, filled = more complete)
-- **Timeline view** — Google Calendar-style with due times, priority colors, and task cards
-- **Day detail screen** — Tap twice to see full task list for any date
+- **Urgency progress bars** — Each day shows a color-coded bar (blue depth in light mode, amber in dark mode)
+- **Google Calendar timeline** — Due times on the left, color-coded task cards on the right
+- **Tap to preview, double-tap to expand** — Single tap switches timeline, second tap opens full day view
+- **Today button** — Quick jump back from any date
 - **Historical view** — Browse past days' tasks (read-only)
+- **Due time support** — Tasks show their scheduled time in the timeline
 
 ### Daily Recap
 - **AI-generated summary** — Encouraging progress report
@@ -95,7 +98,8 @@ Each step has its own **dedicated prompt** designed for the task — not one gen
 - **Dedicated recap screen** — Full-screen experience
 
 ### Notifications & Celebrations
-- **Daily check-in reminder** — Gentle notification at your preferred time
+- **Daily check-in reminder** — Toggle on/off, gentle morning notification
+- **System notifications** — Custom ✨ sparkle icon, branded push notifications
 - **Celebration moments** — ⚡ First task done, 🔥 halfway there, 🎉 all complete
 - **ADHD-friendly** — Encouraging, never nagging
 
@@ -105,6 +109,8 @@ Each step has its own **dedicated prompt** designed for the task — not one gen
 - **Branded splash screen** — Gradient launch with fade-in animation
 - **Platform-aware API** — Auto-detects Android emulator vs web vs device
 - **Collapsible input** — Shrinks on scroll, expands on tap
+- **Hidden development mode** — Triple-tap About to toggle, generates full month of test data
+- **Recap regeneration** — Regenerate AI summary anytime
 
 ## Quick Start
 
