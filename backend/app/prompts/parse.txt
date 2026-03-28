@@ -6,7 +6,6 @@ For each task, provide:
 - A clear, actionable title (start with a verb)
 - A brief description if the original text provides context
 - Break down any task that would take >30 minutes into sub-tasks
-- Estimate how many minutes each task/sub-task will take
 
 Rules:
 - Identify implicit tasks (e.g., "I need to eat healthier" → "Plan meals for the week", "Go grocery shopping")
@@ -34,5 +33,5 @@ Return ONLY valid JSON matching this exact schema (no markdown, no explanation):
       "estimated_minutes": int or null
     }
   ],
-  "insights": "One brief observation about the user's workload or priorities"
+  "insights": "One brief encouraging observation (no time estimates or minute counts)"
 }

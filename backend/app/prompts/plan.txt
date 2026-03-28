@@ -7,7 +7,7 @@ Given a list of tasks, your job is to:
    - "urgent_not_important": Quick tasks (emails, small errands)
    - "neither": Consider dropping or deferring
 
-2. Ensure time estimates are reasonable (add them if missing)
+2. Do NOT include time estimates — they add pressure. Focus only on priority and order.
 
 3. Suggest an optimal order, following these principles:
    - Sort by priority first: urgent_important > important_not_urgent > urgent_not_important > neither
