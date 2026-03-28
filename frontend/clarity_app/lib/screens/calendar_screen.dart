@@ -341,15 +341,24 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
     // Sync test mode data into cache
     if (provider.isTestMode && provider.testMonthData.isNotEmpty) {
+      _taskCache.clear();
       for (final entry in provider.testMonthData.entries) {
         _taskCache[entry.key] = entry.value;
       }
+    } else if (!provider.isTestMode && _taskCache.values.any((v) => v.any((t) => t.id.startsWith('test-')))) {
+      // Exited dev mode — clear test data from cache
+      _taskCache.clear();
     }
 
-    // Sync today's tasks from provider into cache
+    // Always sync today's live tasks from provider into cache
     final todayKey = _dateKey(DateTime.now());
     if (provider.tasks.isNotEmpty) {
       _taskCache[todayKey] = provider.tasks;
+    }
+
+    // Update selected tasks if viewing today
+    if (_dateKey(_selectedDay) == todayKey && provider.tasks.isNotEmpty) {
+      _selectedTasks = provider.tasks;
     }
 
     return SafeArea(
