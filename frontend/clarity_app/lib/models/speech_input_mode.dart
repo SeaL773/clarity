@@ -4,7 +4,7 @@ enum SpeechInputMode {
 }
 
 // Developer switch: true uses Whisper, false uses speech_to_text.
-const bool kUseWhisper = false;
+const bool kUseWhisper = true;
 
 SpeechInputMode get defaultSpeechInputMode =>
     kUseWhisper ? SpeechInputMode.whisper : SpeechInputMode.device;
