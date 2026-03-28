@@ -1,0 +1,105 @@
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import '../models/task.dart';
+import '../services/api_service.dart';
+
+class TaskProvider extends ChangeNotifier {
+  final ApiService _api = ApiService();
+
+  List<Task> _tasks = [];
+  bool _isLoading = false;
+  String? _error;
+  String? _insights;
+  double _totalEstimatedHours = 0;
+  DailySummary? _summary;
+
+  List<Task> get tasks => _tasks;
+  bool get isLoading => _isLoading;
+  String? get error => _error;
+  String? get insights => _insights;
+  double get totalEstimatedHours => _totalEstimatedHours;
+  DailySummary? get summary => _summary;
+
+  int get completedCount => _tasks.where((t) => t.completed).length;
+  int get totalCount => _tasks.length;
+  double get completionRate =>
+      _tasks.isEmpty ? 0 : completedCount / totalCount;
+
+  String get todayDate => DateFormat('yyyy-MM-dd').format(DateTime.now());
+
+  Future<void> processBrainDump(String text) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final result = await _api.process(text);
+      _tasks = result.tasks;
+      _insights = result.insights;
+      _totalEstimatedHours = result.totalEstimatedHours;
+
+      if (result.suggestedOrder.isNotEmpty) {
+        final orderMap = <String, int>{};
+        for (var i = 0; i < result.suggestedOrder.length; i++) {
+          orderMap[result.suggestedOrder[i]] = i;
+        }
+        _tasks.sort((a, b) {
+          final aIdx = orderMap[a.id] ?? 999;
+          final bIdx = orderMap[b.id] ?? 999;
+          return aIdx.compareTo(bIdx);
+        });
+      }
+    } catch (e) {
+      _error = e.toString();
+    }
+
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  void toggleTask(String taskId) {
+    final idx = _tasks.indexWhere((t) => t.id == taskId);
+    if (idx != -1) {
+      _tasks[idx] = _tasks[idx].copyWith(completed: !_tasks[idx].completed);
+      notifyListeners();
+      _api.saveTasks(todayDate, _tasks).catchError((_) {});
+    }
+  }
+
+  void toggleSubTask(String parentId, String subTaskId) {
+    final parentIdx = _tasks.indexWhere((t) => t.id == parentId);
+    if (parentIdx != -1) {
+      final subIdx =
+          _tasks[parentIdx].subTasks.indexWhere((t) => t.id == subTaskId);
+      if (subIdx != -1) {
+        final sub = _tasks[parentIdx].subTasks[subIdx];
+        _tasks[parentIdx].subTasks[subIdx] =
+            sub.copyWith(completed: !sub.completed);
+        notifyListeners();
+      }
+    }
+  }
+
+  Future<void> getDailySummary() async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      _summary = await _api.summarize(_tasks, todayDate);
+    } catch (e) {
+      _error = e.toString();
+    }
+
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  void clearTasks() {
+    _tasks = [];
+    _summary = null;
+    _insights = null;
+    _error = null;
+    notifyListeners();
+  }
+}
