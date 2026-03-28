@@ -138,6 +138,28 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               else
                 const SizedBox(height: 8),
 
+              // Error toast
+              if (provider.error != null)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(18, 4, 18, 4),
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFF0F0),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.red.shade100),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.error_outline_rounded, size: 16, color: Colors.red.shade300),
+                        const SizedBox(width: 8),
+                        Expanded(child: Text(provider.error!,
+                            style: TextStyle(color: Colors.red.shade500, fontSize: 12))),
+                      ],
+                    ),
+                  ),
+                ),
+
               // ── Main content ──
               Expanded(
                 child: hasTasks
