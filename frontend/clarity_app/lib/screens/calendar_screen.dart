@@ -5,7 +5,6 @@ import 'package:table_calendar/table_calendar.dart';
 import '../models/task.dart';
 import '../providers/task_provider.dart';
 import '../services/api_service.dart';
-import '../widgets/task_card.dart';
 import 'calendar_day_screen.dart';
 
 class CalendarScreen extends StatefulWidget {
@@ -173,6 +172,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 _focusedDay = focused;
               });
               _loadTasksForDay(selected);
+              // Navigate to day detail screen
+              final key = _dateKey(selected);
+              final tasks = _taskCache[key] ?? [];
+              Navigator.push(context, MaterialPageRoute(
+                builder: (_) => CalendarDayScreen(date: selected, tasks: tasks),
+              ));
             },
             onPageChanged: (focused) {
               _focusedDay = focused;
@@ -236,93 +241,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
             ),
           ),
 
-          const SizedBox(height: 4),
-
-          // Selected day header
-          Padding(
-            padding: const EdgeInsets.fromLTRB(22, 4, 22, 8),
-            child: Row(
-              children: [
-                Text(
-                  isSameDay(_selectedDay, DateTime.now())
-                      ? 'Today'
-                      : DateFormat('EEEE, MMM d').format(_selectedDay),
-                  style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
-                ),
-                if (_selectedTasks.isNotEmpty) ...[
-                  const SizedBox(width: 8),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(context, MaterialPageRoute(
-                        builder: (_) => CalendarDayScreen(date: _selectedDay, tasks: _selectedTasks),
-                      ));
-                    },
-                    child: Text('View all →',
-                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500,
-                            color: theme.colorScheme.primary.withValues(alpha: 0.6))),
-                  ),
-                  const Spacer(),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primary.withValues(alpha: 0.08),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      '${_selectedTasks.where((t) => t.completed).length} / ${_selectedTasks.length}',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: theme.colorScheme.primary,
-                      ),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-
-          // Task list for selected day
+          // Hint
           Expanded(
-            child: _loadingTasks
-                ? Center(
-                    child: SizedBox(
-                      width: 28,
-                      height: 28,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: theme.colorScheme.primary.withValues(alpha: 0.4),
-                      ),
-                    ),
-                  )
-                : _selectedTasks.isEmpty
-                    ? Center(
-                        child: Text('No tasks',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                                color: theme.colorScheme.onSurface.withValues(alpha: 0.25))),
-                      )
-                    : ListView.separated(
-                        padding: const EdgeInsets.fromLTRB(18, 0, 18, 90),
-                        itemCount: _selectedTasks.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: 5),
-                        itemBuilder: (context, index) {
-                          final task = _selectedTasks[index];
-                          return TaskCard(
-                            task: task,
-                            onToggle: () {
-                              // Only allow toggling today's tasks
-                              if (isSameDay(_selectedDay, DateTime.now())) {
-                                provider.toggleTask(task.id);
-                              }
-                            },
-                            onToggleSubTask: (subId) {
-                              if (isSameDay(_selectedDay, DateTime.now())) {
-                                provider.toggleSubTask(task.id, subId);
-                              }
-                            },
-                          );
-                        },
-                      ),
+            child: Center(
+              child: Text('Tap a date to see tasks',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.25))),
+            ),
           ),
         ],
       ),
