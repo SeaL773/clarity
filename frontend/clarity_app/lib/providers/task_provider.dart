@@ -21,6 +21,7 @@ class TaskProvider extends ChangeNotifier {
   double _totalEstimatedHours = 0;
   DailySummary? _summary;
   AppMode _mode = AppMode.user;
+  bool _isDarkMode = false;
 
   String _selectedDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
@@ -106,6 +107,7 @@ class TaskProvider extends ChangeNotifier {
   String get selectedDate => _selectedDate;
   AppMode get mode => _mode;
   bool get isTestMode => _mode == AppMode.test;
+  bool get isDarkMode => _isDarkMode;
 
   int get completedCount => tasks.where((t) => t.completed).length;
   int get totalCount => tasks.length;
@@ -113,10 +115,15 @@ class TaskProvider extends ChangeNotifier {
 
   String get todayDate => DateFormat('yyyy-MM-dd').format(DateTime.now());
 
+  void toggleDarkMode() {
+    _isDarkMode = !_isDarkMode;
+    notifyListeners();
+  }
+
   Future<void> initializeToday() async {
     _selectedDate = todayDate;
     if (isTestMode) {
-      _taskCache[todayDate] = [];
+      _taskCache[todayDate] = _buildMockTasksForToday();
       notifyListeners();
       return;
     }
@@ -135,9 +142,12 @@ class TaskProvider extends ChangeNotifier {
 
     if (isTestMode) {
       _seedMockMonth(DateTime.now());
-      _taskCache[todayDate] = [];
+      _taskCache[todayDate] = _buildMockTasksForToday();
       _insights = 'Test mode is active. Tasks and recap use local demo data only.';
-      _totalEstimatedHours = 0;
+      _totalEstimatedHours = _taskCache[todayDate]!.fold<double>(
+        0,
+        (sum, task) => sum + ((task.estimatedMinutes ?? 0) / 60),
+      );
       notifyListeners();
       return;
     }
@@ -238,7 +248,7 @@ class TaskProvider extends ChangeNotifier {
       _insights = result.insights;
       _totalEstimatedHours += result.totalEstimatedHours;
     } catch (e) {
-      _error = e.toString();
+      _error = 'Could not process. Please try again.';
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -363,7 +373,7 @@ class TaskProvider extends ChangeNotifier {
       final date = DateTime(month.year, month.month, day);
       final dateKey = _formatDate(date);
       if (dateKey == todayDate) {
-        _taskCache[dateKey] = [];
+        _taskCache[dateKey] = _buildMockTasksForToday();
         continue;
       }
       _ensureMockDate(dateKey, force: true);
@@ -423,6 +433,110 @@ class TaskProvider extends ChangeNotifier {
     }
 
     return tasks;
+  }
+
+  List<Task> _buildMockTasksForToday() {
+    return [
+      Task(
+        id: 'today-demo-1',
+        title: 'Review today\'s priorities',
+        description: 'Use this card to verify the homepage task layout in test mode.',
+        priority: 'urgent_important',
+        estimatedMinutes: 20,
+        completed: false,
+        subTasks: [
+          Task(
+            id: 'today-demo-1-sub-1',
+            title: 'Check title and description spacing',
+            completed: true,
+          ),
+          Task(
+            id: 'today-demo-1-sub-2',
+            title: 'Toggle completion state',
+            completed: false,
+          ),
+        ],
+      ),
+      Task(
+        id: 'today-demo-2',
+        title: 'Open calendar and day detail',
+        description: 'Validate navigation from month view into a single date.',
+        priority: 'important_not_urgent',
+        estimatedMinutes: 15,
+        completed: false,
+        subTasks: [
+          Task(
+            id: 'today-demo-2-sub-1',
+            title: 'Check the 3/5 style counters',
+            completed: false,
+          ),
+        ],
+      ),
+      Task(
+        id: 'today-demo-3',
+        title: 'Generate recap locally',
+        description: 'This one helps test mixed complete and incomplete states.',
+        priority: 'urgent_not_important',
+        estimatedMinutes: 10,
+        completed: true,
+      ),
+      Task(
+        id: 'today-demo-4',
+        title: 'Refine one homepage card state',
+        description: 'Use this to check longer text wrapping and spacing.',
+        priority: 'important_not_urgent',
+        estimatedMinutes: 25,
+        completed: false,
+        subTasks: [
+          Task(
+            id: 'today-demo-4-sub-1',
+            title: 'Verify description truncation is not needed',
+            completed: false,
+          ),
+          Task(
+            id: 'today-demo-4-sub-2',
+            title: 'Confirm checkbox alignment',
+            completed: false,
+          ),
+        ],
+      ),
+      Task(
+        id: 'today-demo-5',
+        title: 'Test quick clear flow',
+        description: 'This card is here so clear-all has a larger list to work on.',
+        priority: 'neither',
+        estimatedMinutes: 5,
+        completed: false,
+      ),
+      Task(
+        id: 'today-demo-6',
+        title: 'Validate scrolling behavior',
+        description: 'Scroll the list and confirm the input area collapses cleanly.',
+        priority: 'urgent_important',
+        estimatedMinutes: 30,
+        completed: false,
+        subTasks: [
+          Task(
+            id: 'today-demo-6-sub-1',
+            title: 'Scroll down',
+            completed: true,
+          ),
+          Task(
+            id: 'today-demo-6-sub-2',
+            title: 'Scroll back up',
+            completed: false,
+          ),
+        ],
+      ),
+      Task(
+        id: 'today-demo-7',
+        title: 'Check completed card styling',
+        description: 'Keep at least one fully completed card visible on the homepage.',
+        priority: 'urgent_not_important',
+        estimatedMinutes: 12,
+        completed: true,
+      ),
+    ];
   }
 
   void _addMockTasksFromInput(String text) {

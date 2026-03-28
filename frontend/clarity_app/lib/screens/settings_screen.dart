@@ -83,6 +83,16 @@ class SettingsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             _SettingsSection(
+              title: 'Appearance',
+              children: [
+                _AppearanceTile(
+                  isDarkMode: provider.isDarkMode,
+                  onTap: () => context.read<TaskProvider>().toggleDarkMode(),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            _SettingsSection(
               title: 'Available now',
               children: const [
                 _SettingsTile(
@@ -96,12 +106,6 @@ class SettingsScreen extends StatelessWidget {
             _SettingsSection(
               title: 'Coming Soon',
               children: [
-                _SettingsTile(
-                  icon: Icons.dark_mode_outlined,
-                  title: 'Dark Mode',
-                  subtitle: 'Easy on the eyes',
-                  trailing: _ComingSoonBadge(),
-                ),
                 _SettingsTile(
                   icon: Icons.notifications_outlined,
                   title: 'Reminders',
@@ -186,6 +190,104 @@ class _ModeTile extends StatelessWidget {
   }
 }
 
+class _AppearanceTile extends StatelessWidget {
+  const _AppearanceTile({
+    required this.isDarkMode,
+    required this.onTap,
+  });
+
+  final bool isDarkMode;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      child: Row(
+        children: [
+          Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+              color: theme.colorScheme.primary.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(9),
+            ),
+            child: Icon(
+              Icons.dark_mode_outlined,
+              size: 18,
+              color: theme.colorScheme.primary.withValues(alpha: 0.6),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Dark Mode',
+                  style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+                ),
+                Text(
+                  'Easy on the eyes',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          GestureDetector(
+            onTap: onTap,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 250),
+              width: 50,
+              height: 28,
+              padding: const EdgeInsets.all(3),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(14),
+                color: isDarkMode
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.onSurface.withValues(alpha: 0.12),
+              ),
+              child: AnimatedAlign(
+                duration: const Duration(milliseconds: 250),
+                curve: Curves.easeOut,
+                alignment: isDarkMode ? Alignment.centerRight : Alignment.centerLeft,
+                child: Container(
+                  width: 22,
+                  height: 22,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.1),
+                        blurRadius: 4,
+                        offset: const Offset(0, 1),
+                      ),
+                    ],
+                  ),
+                  child: Center(
+                    child: Icon(
+                      isDarkMode ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
+                      size: 13,
+                      color: isDarkMode
+                          ? theme.colorScheme.primary
+                          : Colors.orange.shade300,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _SettingsSection extends StatelessWidget {
   const _SettingsSection({
     required this.title,
@@ -212,7 +314,9 @@ class _SettingsSection extends StatelessWidget {
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: theme.brightness == Brightness.dark
+                ? const Color(0xFF252320)
+                : Colors.white,
             borderRadius: BorderRadius.circular(16),
           ),
           child: Column(

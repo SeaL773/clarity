@@ -6,6 +6,7 @@ import uuid
 from pathlib import Path
 
 import boto3
+import httpx
 from openai import AsyncOpenAI
 
 PROMPTS_DIR = Path(__file__).parent.parent / "prompts"
@@ -136,9 +137,16 @@ def _parse_event_stream(raw_bytes: bytes) -> str:
 
 
 async def call_llm(system_prompt: str, user_message: str) -> dict:
-    """Call LLM and return parsed JSON. Tries Kiro first, then Bedrock, then OpenAI."""
+    """Call LLM and return parsed JSON. Tries Anthropic first, then Kiro, Bedrock, OpenAI."""
 
-    # Try Kiro first (uses Kiro Credits)
+    # Try Anthropic direct API first
+    if os.getenv("ANTHROPIC_API_KEY"):
+        try:
+            return await _call_anthropic(system_prompt, user_message)
+        except Exception as e:
+            print(f"[LLM] Anthropic failed: {e}, trying next provider...")
+
+    # Try Kiro (uses Kiro Credits)
     kiro_token = _get_kiro_token()
     if kiro_token:
         try:
@@ -157,7 +165,48 @@ async def call_llm(system_prompt: str, user_message: str) -> dict:
     if os.getenv("OPENAI_API_KEY"):
         return await _call_openai(system_prompt, user_message)
 
-    raise RuntimeError("No LLM provider configured. Set Kiro credits, AWS, or OPENAI credentials.")
+    raise RuntimeError("No LLM provider configured.")
+
+
+async def _call_anthropic(system_prompt: str, user_message: str) -> dict:
+    """Call Anthropic API directly (Claude Haiku)."""
+    api_key = os.getenv("ANTHROPIC_API_KEY")
+    model = os.getenv("ANTHROPIC_MODEL", "claude-haiku-4-20250414")
+
+    print(f"[LLM] Calling Anthropic API (model: {model})...")
+
+    async with httpx.AsyncClient(timeout=120.0) as client:
+        response = await client.post(
+            "https://api.anthropic.com/v1/messages",
+            headers={
+                "x-api-key": api_key,
+                "anthropic-version": "2023-06-01",
+                "content-type": "application/json",
+            },
+            json={
+                "model": model,
+                "max_tokens": 4096,
+                "system": system_prompt,
+                "messages": [
+                    {"role": "user", "content": user_message}
+                ],
+            },
+        )
+
+    if response.status_code != 200:
+        raise RuntimeError(f"Anthropic API error ({response.status_code}): {response.text[:200]}")
+
+    result = response.json()
+    text = result["content"][0]["text"]
+    print(f"[LLM] Anthropic response length: {len(text)} chars")
+
+    # Extract JSON
+    json_start = text.find("{")
+    json_end = text.rfind("}") + 1
+    if json_start >= 0 and json_end > json_start:
+        return json.loads(text[json_start:json_end])
+
+    raise RuntimeError(f"Could not parse JSON from Anthropic response: {text[:200]}")
 
 
 async def _call_kiro(system_prompt: str, user_message: str, token: str) -> dict:

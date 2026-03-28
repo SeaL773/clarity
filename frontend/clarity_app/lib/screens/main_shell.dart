@@ -1,4 +1,7 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
+
 import 'home_screen.dart';
 import 'recap_screen.dart';
 import 'settings_screen.dart';
@@ -15,6 +18,7 @@ class _MainShellState extends State<MainShell> {
 
   final _pages = const [
     HomeScreen(),
+    HomeScreen(initialCalendarView: true),
     RecapScreen(),
     SettingsScreen(),
   ];
@@ -24,60 +28,85 @@ class _MainShellState extends State<MainShell> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _pages,
-      ),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border(top: BorderSide(color: Colors.grey.shade100)),
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _NavItem(
-                  icon: Icons.home_rounded,
-                  label: 'Home',
-                  isActive: _currentIndex == 0,
-                  onTap: () => setState(() => _currentIndex = 0),
+      body: Stack(
+        children: [
+          IndexedStack(
+            index: _currentIndex,
+            children: _pages,
+          ),
+          Positioned(
+            left: 16,
+            right: 16,
+            bottom: MediaQuery.of(context).padding.bottom + 12,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(28),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: theme.brightness == Brightness.dark
+                        ? const Color(0xFF252320).withValues(alpha: 0.75)
+                        : Colors.white.withValues(alpha: 0.55),
+                    borderRadius: BorderRadius.circular(28),
+                    border: Border.all(
+                      color: theme.brightness == Brightness.dark
+                          ? Colors.white.withValues(alpha: 0.1)
+                          : Colors.white.withValues(alpha: 0.35),
+                      width: 0.5,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _NavItem(
+                        icon: Icons.home_rounded,
+                        label: 'Home',
+                        isActive: _currentIndex == 0,
+                        onTap: () => setState(() => _currentIndex = 0),
+                      ),
+                      _NavItem(
+                        icon: Icons.calendar_month_rounded,
+                        label: 'Calendar',
+                        isActive: _currentIndex == 1,
+                        onTap: () => setState(() => _currentIndex = 1),
+                      ),
+                      _NavItem(
+                        icon: Icons.insights_rounded,
+                        label: 'Recap',
+                        isActive: _currentIndex == 2,
+                        onTap: () => setState(() => _currentIndex = 2),
+                      ),
+                      _NavItem(
+                        icon: Icons.settings_outlined,
+                        label: 'Settings',
+                        isActive: _currentIndex == 3,
+                        onTap: () => setState(() => _currentIndex = 3),
+                      ),
+                    ],
+                  ),
                 ),
-                _NavItem(
-                  icon: Icons.insights_rounded,
-                  label: 'Recap',
-                  isActive: _currentIndex == 1,
-                  onTap: () => setState(() => _currentIndex = 1),
-                ),
-                _NavItem(
-                  icon: Icons.settings_outlined,
-                  label: 'Settings',
-                  isActive: _currentIndex == 2,
-                  onTap: () => setState(() => _currentIndex = 2),
-                ),
-              ],
+              ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
 }
 
 class _NavItem extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final bool isActive;
-  final VoidCallback onTap;
-
   const _NavItem({
     required this.icon,
     required this.label,
     required this.isActive,
     required this.onTap,
   });
+
+  final IconData icon;
+  final String label;
+  final bool isActive;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -90,18 +119,20 @@ class _NavItem extends StatelessWidget {
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(icon, size: 24, color: color),
             const SizedBox(height: 3),
-            Text(label,
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
-                  color: color,
-                )),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+                color: color,
+              ),
+            ),
           ],
         ),
       ),

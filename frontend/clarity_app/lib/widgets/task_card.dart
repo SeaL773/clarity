@@ -29,13 +29,17 @@ class TaskCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final accent = task.completed ? const Color(0xFFD0D0D0) : _priorityAccent(task.priority);
+    final isDark = theme.brightness == Brightness.dark;
+    final accent = task.completed ? (isDark ? const Color(0xFF3A3530) : const Color(0xFFD0D0D0)) : _priorityAccent(task.priority);
+    final cardBg = task.completed
+        ? (isDark ? const Color(0xFF1E1C18) : const Color(0xFFFAFAFA))
+        : (isDark ? const Color(0xFF252320) : Colors.white);
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 250),
       curve: Curves.easeOut,
       decoration: BoxDecoration(
-        color: task.completed ? const Color(0xFFFAFAFA) : Colors.white,
+        color: cardBg,
         borderRadius: BorderRadius.circular(14),
         border: Border(
           left: BorderSide(color: accent, width: 3.5),
@@ -119,7 +123,7 @@ class TaskCard extends StatelessWidget {
                             value: sub.completed,
                             onChanged: (_) => onToggleSubTask(sub.id),
                             shape: const CircleBorder(),
-                            activeColor: const Color(0xFFBDBDBD),
+                            activeColor: isDark ? const Color(0xFF5A5550) : const Color(0xFFBDBDBD),
                             side: BorderSide(
                               color: theme.colorScheme.onSurface.withValues(alpha: 0.2),
                               width: 1.3,
