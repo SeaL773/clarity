@@ -13,6 +13,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
   bool _inputExpanded = true;
+  bool _autoCollapsed = false;
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
 
@@ -39,8 +40,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     final provider = context.watch<TaskProvider>();
     final hasTasks = provider.tasks.isNotEmpty;
 
-    // Auto-collapse input when tasks appear
-    if (hasTasks && _inputExpanded) {
+    // Auto-collapse input once after first tasks load
+    if (hasTasks && _inputExpanded && !provider.isLoading && !_autoCollapsed) {
+      _autoCollapsed = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) setState(() => _inputExpanded = false);
       });
@@ -89,7 +91,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                     // Add button (when input collapsed)
                     if (!_inputExpanded && hasTasks)
                       _IconChip(
-                        icon: Icons.add_rounded,
+                        icon: Icons.chat_bubble_outline_rounded,
                         onPressed: () => setState(() => _inputExpanded = true),
                         tooltip: 'Add tasks',
                       ),
