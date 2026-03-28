@@ -138,12 +138,21 @@ class _CalendarScreenState extends State<CalendarScreen> {
     return tasks.where((t) => t.completed).length / tasks.length;
   }
 
-  // Urgency → color gradient: red(1.0) → orange(0.66) → blue(0.33) → grey(0.0)
-  Color _urgencyColor(double score) {
-    if (score > 0.66) return Color.lerp(const Color(0xFFFFB74D), const Color(0xFFE57373), (score - 0.66) / 0.34)!;
-    if (score > 0.33) return Color.lerp(const Color(0xFF7BAAF7), const Color(0xFFFFB74D), (score - 0.33) / 0.33)!;
-    if (score > 0) return Color.lerp(const Color(0xFFBDBDBD), const Color(0xFF7BAAF7), score / 0.33)!;
-    return const Color(0xFFBDBDBD);
+  // Urgency → color: light mode uses blue shades, dark mode uses warm multi-color
+  Color _urgencyColor(double score, bool isDark) {
+    if (isDark) {
+      // Dark mode: warm multi-color (red → orange → blue → grey)
+      if (score > 0.66) return Color.lerp(const Color(0xFFFFB74D), const Color(0xFFE57373), (score - 0.66) / 0.34)!;
+      if (score > 0.33) return Color.lerp(const Color(0xFF7BAAF7), const Color(0xFFFFB74D), (score - 0.33) / 0.33)!;
+      if (score > 0) return Color.lerp(const Color(0xFFBDBDBD), const Color(0xFF7BAAF7), score / 0.33)!;
+      return const Color(0xFFBDBDBD);
+    } else {
+      // Light mode: blue depth — darker blue = more urgent
+      if (score > 0.66) return const Color(0xFF2D5BA0); // deep blue
+      if (score > 0.33) return const Color(0xFF5B7FBF); // medium blue
+      if (score > 0) return const Color(0xFF9BB8E0);    // light blue
+      return const Color(0xFFD0D8E8);                    // very light blue-grey
+    }
   }
 
   Widget _buildDayCell(BuildContext context, DateTime day, bool isToday, bool isSelected) {
@@ -154,7 +163,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
     final urgency = hasTasks ? _urgencyScore(tasks!) : 0.0;
     final completion = hasTasks ? _completionRate(tasks!) : 0.0;
-    final barColor = hasTasks ? _urgencyColor(urgency) : Colors.transparent;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final barColor = hasTasks ? _urgencyColor(urgency, isDark) : Colors.transparent;
 
     return Container(
       margin: const EdgeInsets.all(3),
