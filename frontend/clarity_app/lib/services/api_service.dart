@@ -2,8 +2,8 @@ import 'package:dio/dio.dart';
 import '../models/task.dart';
 
 class ApiService {
-  // static const String baseUrl = 'http://10.0.2.2:8000'; // Android emulator → localhost
-  static const String baseUrl = 'http://localhost:8000'; // Web / iOS simulator
+  static const String baseUrl = 'http://10.0.2.2:8000'; // Android emulator → host localhost
+  // static const String baseUrl = 'http://localhost:8000'; // Web / Windows / iOS simulator
 
   final Dio _dio = Dio(BaseOptions(
     baseUrl: baseUrl,
