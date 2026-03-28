@@ -339,7 +339,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
         // Tasks
         SliverPadding(
-          padding: const EdgeInsets.fromLTRB(18, 2, 18, 20),
+          padding: const EdgeInsets.fromLTRB(18, 2, 18, 90),
           sliver: SliverList.separated(
             itemCount: provider.tasks.length,
             separatorBuilder: (_, __) => const SizedBox(height: 5),
