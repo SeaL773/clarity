@@ -27,8 +27,21 @@ class _CalendarScreenState extends State<CalendarScreen> {
   @override
   void initState() {
     super.initState();
-    _loadTasksForDay(_selectedDay);
-    _preloadMonth(_focusedDay);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _syncTestData();
+      _preloadMonth(_focusedDay);
+      _loadTasksForDay(_selectedDay);
+    });
+  }
+
+  void _syncTestData() {
+    final provider = Provider.of<TaskProvider>(context, listen: false);
+    if (provider.isTestMode) {
+      for (final entry in provider.testMonthData.entries) {
+        _taskCache[entry.key] = entry.value;
+      }
+      setState(() {});
+    }
   }
 
   String _dateKey(DateTime day) => DateFormat('yyyy-MM-dd').format(day);
@@ -203,13 +216,17 @@ class _CalendarScreenState extends State<CalendarScreen> {
     final isDark = theme.brightness == Brightness.dark;
     final provider = context.watch<TaskProvider>();
 
+    // Sync test mode data into cache
+    if (provider.isTestMode && provider.testMonthData.isNotEmpty) {
+      for (final entry in provider.testMonthData.entries) {
+        _taskCache[entry.key] = entry.value;
+      }
+    }
+
     // Sync today's tasks from provider into cache
     final todayKey = _dateKey(DateTime.now());
     if (provider.tasks.isNotEmpty) {
       _taskCache[todayKey] = provider.tasks;
-      if (_dateKey(_selectedDay) == todayKey) {
-        _selectedTasks = provider.tasks;
-      }
     }
 
     return SafeArea(
