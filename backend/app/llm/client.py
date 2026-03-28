@@ -30,67 +30,28 @@ KIRO_VERSION = "0.6.18"
 
 
 def _get_kiro_token() -> str | None:
-    """Read Kiro access token from cache file. Returns None if expired."""
+    """Read Kiro access token from cache file (re-reads every call)."""
     if not KIRO_TOKEN_PATH.exists():
         return None
     try:
         data = json.loads(KIRO_TOKEN_PATH.read_text(encoding="utf-8"))
-        # Check if token is expired
+        token = data.get("accessToken")
+        if not token:
+            return None
+        # Warn if expired (but still return — Kiro IDE may have refreshed the file)
         expires_at = data.get("expiresAt", "")
         if expires_at:
             from datetime import datetime, timezone
             expiry = datetime.fromisoformat(expires_at.replace("Z", "+00:00"))
             now = datetime.now(timezone.utc)
-            if now >= expiry:
-                print(f"[LLM] Kiro token expired at {expires_at}, attempting refresh...")
-                refreshed = _refresh_kiro_token(data)
-                if refreshed:
-                    return refreshed
-                print("[LLM] Kiro token refresh failed")
-                return None
-        return data.get("accessToken")
+            remaining = (expiry - now).total_seconds()
+            if remaining < 0:
+                print(f"[LLM] Warning: Kiro token looks expired. Open Kiro IDE to refresh.")
+            elif remaining < 300:
+                print(f"[LLM] Warning: Kiro token expires in {int(remaining)}s")
+        return token
     except Exception as e:
         print(f"[LLM] Error reading Kiro token: {e}")
-        return None
-
-
-def _refresh_kiro_token(token_data: dict) -> str | None:
-    """Refresh Kiro token using refreshToken via OIDC endpoint."""
-    refresh_token = token_data.get("refreshToken")
-    if not refresh_token:
-        return None
-    try:
-        import httpx
-        # Kiro uses AWS SSO OIDC to refresh tokens
-        response = httpx.post(
-            "https://oidc.us-east-1.amazonaws.com/token",
-            json={
-                "grantType": "refresh_token",
-                "clientId": "kiro",
-                "refreshToken": refresh_token,
-            },
-            headers={"Content-Type": "application/json"},
-            timeout=15.0,
-        )
-        if response.status_code == 200:
-            result = response.json()
-            new_access = result.get("accessToken")
-            if new_access:
-                # Update the cache file
-                from datetime import datetime, timezone, timedelta
-                token_data["accessToken"] = new_access
-                if result.get("expiresIn"):
-                    new_expiry = datetime.now(timezone.utc) + timedelta(seconds=result["expiresIn"])
-                    token_data["expiresAt"] = new_expiry.isoformat().replace("+00:00", "Z")
-                if result.get("refreshToken"):
-                    token_data["refreshToken"] = result["refreshToken"]
-                KIRO_TOKEN_PATH.write_text(json.dumps(token_data, indent=2), encoding="utf-8")
-                print("[LLM] Kiro token refreshed successfully!")
-                return new_access
-        print(f"[LLM] Token refresh failed: {response.status_code} {response.text[:200]}")
-        return None
-    except Exception as e:
-        print(f"[LLM] Token refresh error: {e}")
         return None
 
 
