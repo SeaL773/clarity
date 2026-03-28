@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'home_screen.dart';
-import 'tasks_screen.dart';
 import 'recap_screen.dart';
 import 'settings_screen.dart';
 
@@ -16,7 +15,6 @@ class _MainShellState extends State<MainShell> {
 
   final _pages = const [
     HomeScreen(),
-    TasksScreen(),
     RecapScreen(),
     SettingsScreen(),
   ];
@@ -42,28 +40,22 @@ class _MainShellState extends State<MainShell> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _NavItem(
-                  icon: Icons.auto_awesome_rounded,
-                  label: 'Clarity',
+                  icon: Icons.home_rounded,
+                  label: 'Home',
                   isActive: _currentIndex == 0,
                   onTap: () => setState(() => _currentIndex = 0),
                 ),
                 _NavItem(
-                  icon: Icons.check_circle_outline_rounded,
-                  label: 'Tasks',
+                  icon: Icons.insights_rounded,
+                  label: 'Recap',
                   isActive: _currentIndex == 1,
                   onTap: () => setState(() => _currentIndex = 1),
                 ),
                 _NavItem(
-                  icon: Icons.insights_rounded,
-                  label: 'Recap',
-                  isActive: _currentIndex == 2,
-                  onTap: () => setState(() => _currentIndex = 2),
-                ),
-                _NavItem(
                   icon: Icons.settings_outlined,
                   label: 'Settings',
-                  isActive: _currentIndex == 3,
-                  onTap: () => setState(() => _currentIndex = 3),
+                  isActive: _currentIndex == 2,
+                  onTap: () => setState(() => _currentIndex = 2),
                 ),
               ],
             ),
@@ -98,7 +90,7 @@ class _NavItem extends StatelessWidget {
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

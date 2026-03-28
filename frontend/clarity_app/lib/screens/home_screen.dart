@@ -2,39 +2,74 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/task_provider.dart';
 import '../widgets/brain_dump_input.dart';
+import '../widgets/task_card.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
+  bool _inputExpanded = true;
+  late AnimationController _fadeController;
+  late Animation<double> _fadeAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _fadeController = AnimationController(
+      duration: const Duration(milliseconds: 700),
+      vsync: this,
+    );
+    _fadeAnimation = CurvedAnimation(parent: _fadeController, curve: Curves.easeOut);
+    _fadeController.forward();
+  }
+
+  @override
+  void dispose() {
+    _fadeController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final provider = context.watch<TaskProvider>();
+    final hasTasks = provider.tasks.isNotEmpty;
 
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            const Color(0xFFEEF2FA),
-            theme.scaffoldBackgroundColor,
-          ],
-          stops: const [0.0, 0.4],
+    // Auto-collapse input when tasks appear
+    if (hasTasks && _inputExpanded) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) setState(() => _inputExpanded = false);
+      });
+    }
+
+    return FadeTransition(
+      opacity: _fadeAnimation,
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              const Color(0xFFEEF2FA),
+              theme.scaffoldBackgroundColor,
+            ],
+            stops: const [0.0, 0.35],
+          ),
         ),
-      ),
-      child: SafeArea(
-        child: Column(
-          children: [
-            // Top input area
-            Padding(
-              padding: const EdgeInsets.fromLTRB(18, 14, 18, 8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Header
-                  Row(
-                    children: [
+        child: SafeArea(
+          child: Column(
+            children: [
+              // ── Top bar ──
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 14, 16, 0),
+                child: Row(
+                  children: [
+                    // App icon + name (only when collapsed or no tasks)
+                    if (!_inputExpanded || !hasTasks) ...[
                       Container(
                         width: 34,
                         height: 34,
@@ -50,28 +85,59 @@ class HomeScreen extends StatelessWidget {
                           style: theme.textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.w700, letterSpacing: -0.3)),
                     ],
-                  ),
-                  const SizedBox(height: 14),
-                  // Input
-                  const BrainDumpInput(),
-                ],
+                    const Spacer(),
+                    // Add button (when input collapsed)
+                    if (!_inputExpanded && hasTasks)
+                      _IconChip(
+                        icon: Icons.add_rounded,
+                        onPressed: () => setState(() => _inputExpanded = true),
+                        tooltip: 'Add tasks',
+                      ),
+                    // Clear button
+                    if (hasTasks)
+                      Padding(
+                        padding: const EdgeInsets.only(left: 6),
+                        child: _IconChip(
+                          icon: Icons.delete_outline_rounded,
+                          onPressed: () => _showClearDialog(context),
+                          tooltip: 'Clear all',
+                        ),
+                      ),
+                  ],
+                ),
               ),
-            ),
 
-            // Loading / insights / recent tasks preview
-            Expanded(
-              child: provider.isLoading && provider.tasks.isEmpty
-                  ? _buildLoading(theme)
-                  : provider.tasks.isEmpty
-                      ? _buildEmpty(theme)
-                      : _buildRecentPreview(context, theme, provider),
-            ),
-          ],
+              // ── Input area (expandable) ──
+              AnimatedCrossFade(
+                firstChild: Padding(
+                  padding: const EdgeInsets.fromLTRB(18, 12, 18, 6),
+                  child: BrainDumpInput(
+                    onCollapse: () => setState(() => _inputExpanded = false),
+                  ),
+                ),
+                secondChild: const SizedBox(height: 8),
+                crossFadeState: _inputExpanded
+                    ? CrossFadeState.showFirst
+                    : CrossFadeState.showSecond,
+                duration: const Duration(milliseconds: 300),
+              ),
+
+              // ── Main content ──
+              Expanded(
+                child: hasTasks
+                    ? _buildTaskList(context, theme, provider)
+                    : provider.isLoading
+                        ? _buildLoading(theme)
+                        : _buildEmpty(theme),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
+  // ── Empty state ──
   Widget _buildEmpty(ThemeData theme) {
     return Center(
       child: Padding(
@@ -79,11 +145,14 @@ class HomeScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            Icon(Icons.auto_awesome_rounded,
+                size: 40, color: theme.colorScheme.primary.withValues(alpha: 0.3)),
+            const SizedBox(height: 18),
             Text(
               _getGreeting(),
               style: theme.textTheme.headlineMedium?.copyWith(
                 fontWeight: FontWeight.w600,
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.55),
                 letterSpacing: -0.5,
               ),
               textAlign: TextAlign.center,
@@ -92,7 +161,7 @@ class HomeScreen extends StatelessWidget {
             Text(
               'Type or speak what\'s on your mind.\nAI will organize it for you.',
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.25),
                 height: 1.5,
               ),
               textAlign: TextAlign.center,
@@ -103,155 +172,141 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
+  // ── Loading state ──
   Widget _buildLoading(ThemeData theme) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           SizedBox(
-            width: 36,
-            height: 36,
+            width: 32,
+            height: 32,
             child: CircularProgressIndicator(
               strokeWidth: 2.5,
               color: theme.colorScheme.primary.withValues(alpha: 0.4),
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
           Text('Organizing your thoughts...',
               style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.35))),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.3))),
         ],
       ),
     );
   }
 
-  Widget _buildRecentPreview(BuildContext context, ThemeData theme, TaskProvider provider) {
-    final incompleteTasks = provider.tasks.where((t) => !t.completed).take(3).toList();
-    final completedCount = provider.completedCount;
-    final totalCount = provider.totalCount;
-
-    return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Insight
-          if (provider.insights != null)
-            Container(
-              margin: const EdgeInsets.only(bottom: 12),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.primary.withValues(alpha: 0.05),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.lightbulb_outline_rounded,
-                      color: theme.colorScheme.primary.withValues(alpha: 0.5), size: 16),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(provider.insights!,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                            height: 1.4)),
-                  ),
-                ],
-              ),
-            ),
-
-          // Summary card
-          Container(
-            padding: const EdgeInsets.all(18),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+  // ── Task list ──
+  Widget _buildTaskList(BuildContext context, ThemeData theme, TaskProvider provider) {
+    return CustomScrollView(
+      slivers: [
+        // Insight
+        if (provider.insights != null)
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(18, 4, 18, 6),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 9),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primary.withValues(alpha: 0.04),
+                  borderRadius: BorderRadius.circular(11),
+                ),
+                child: Row(
                   children: [
-                    Text('Today',
-                        style: theme.textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w700)),
-                    const Spacer(),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.primary.withValues(alpha: 0.08),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text('$completedCount / $totalCount',
-                          style: theme.textTheme.labelSmall?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: theme.colorScheme.primary)),
+                    Icon(Icons.lightbulb_outline_rounded,
+                        color: theme.colorScheme.primary.withValues(alpha: 0.45), size: 15),
+                    const SizedBox(width: 9),
+                    Expanded(
+                      child: Text(provider.insights!,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurface.withValues(alpha: 0.45),
+                              height: 1.4,
+                              fontSize: 12)),
                     ),
                   ],
                 ),
-                const SizedBox(height: 10),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(4),
-                  child: LinearProgressIndicator(
-                    value: provider.completionRate,
-                    minHeight: 4,
-                    backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.06),
-                    color: theme.colorScheme.primary.withValues(alpha: 0.45),
+              ),
+            ),
+          ),
+
+        // Progress
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primary.withValues(alpha: 0.07),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    '${provider.completedCount} / ${provider.totalCount}',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: theme.colorScheme.primary,
+                      fontSize: 11,
+                    ),
                   ),
                 ),
-                if (incompleteTasks.isNotEmpty) ...[
-                  const SizedBox(height: 14),
-                  Text('Up next',
-                      style: theme.textTheme.labelSmall?.copyWith(
-                          color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
-                          fontWeight: FontWeight.w600)),
-                  const SizedBox(height: 8),
-                  ...incompleteTasks.map((task) => Padding(
-                    padding: const EdgeInsets.only(bottom: 6),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 6,
-                          height: 6,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: _priorityColor(task.priority),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text(task.title,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.onSurface.withValues(alpha: 0.65))),
-                        ),
-                      ],
+                const SizedBox(width: 10),
+                Expanded(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(
+                      value: provider.completionRate,
+                      minHeight: 3.5,
+                      backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.05),
+                      color: theme.colorScheme.primary.withValues(alpha: 0.4),
                     ),
-                  )),
-                ],
+                  ),
+                ),
               ],
             ),
           ),
-          const SizedBox(height: 10),
-          Center(
-            child: Text('Switch to Tasks tab to see all →',
-                style: theme.textTheme.labelSmall?.copyWith(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.25))),
-          ),
-        ],
-      ),
-    );
-  }
+        ),
 
-  Color _priorityColor(String? priority) {
-    switch (priority) {
-      case 'urgent_important':
-        return const Color(0xFFE57373);
-      case 'urgent_not_important':
-        return const Color(0xFFFFB74D);
-      case 'important_not_urgent':
-        return const Color(0xFF7BAAF7);
-      default:
-        return const Color(0xFFBDBDBD);
-    }
+        // Error
+        if (provider.error != null)
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 4),
+              child: Container(
+                padding: const EdgeInsets.all(11),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFF0F0),
+                  borderRadius: BorderRadius.circular(11),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.error_outline_rounded, size: 15, color: Colors.red.shade300),
+                    const SizedBox(width: 8),
+                    Expanded(child: Text(provider.error!,
+                        style: TextStyle(color: Colors.red.shade500, fontSize: 12))),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+        // Tasks
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(18, 2, 18, 20),
+          sliver: SliverList.separated(
+            itemCount: provider.tasks.length,
+            separatorBuilder: (_, __) => const SizedBox(height: 5),
+            itemBuilder: (context, index) {
+              final task = provider.tasks[index];
+              return TaskCard(
+                task: task,
+                onToggle: () => provider.toggleTask(task.id),
+                onToggleSubTask: (subId) => provider.toggleSubTask(task.id, subId),
+              );
+            },
+          ),
+        ),
+      ],
+    );
   }
 
   String _getGreeting() {
@@ -259,5 +314,58 @@ class HomeScreen extends StatelessWidget {
     if (hour < 12) return 'Good morning';
     if (hour < 17) return 'Good afternoon';
     return 'Good evening';
+  }
+
+  void _showClearDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text('Clear all tasks?'),
+        content: const Text('This will remove all tasks for today.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          FilledButton(
+            onPressed: () {
+              context.read<TaskProvider>().clearTasks();
+              setState(() => _inputExpanded = true);
+              Navigator.pop(ctx);
+            },
+            child: const Text('Clear'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Icon chip button ──
+
+class _IconChip extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback? onPressed;
+  final String? tooltip;
+
+  const _IconChip({required this.icon, this.onPressed, this.tooltip});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Tooltip(
+      message: tooltip ?? '',
+      child: Material(
+        color: theme.colorScheme.onSurface.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(10),
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(10),
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: Icon(icon, size: 20,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.4)),
+          ),
+        ),
+      ),
+    );
   }
 }

@@ -4,7 +4,8 @@ import '../providers/task_provider.dart';
 import '../services/speech_service.dart';
 
 class BrainDumpInput extends StatefulWidget {
-  const BrainDumpInput({super.key});
+  final VoidCallback? onCollapse;
+  const BrainDumpInput({super.key, this.onCollapse});
 
   @override
   State<BrainDumpInput> createState() => _BrainDumpInputState();
@@ -49,6 +50,7 @@ class _BrainDumpInputState extends State<BrainDumpInput> {
     _controller.clear();
     setState(() => _expanded = false);
     FocusScope.of(context).unfocus();
+    widget.onCollapse?.call();
   }
 
   @override
