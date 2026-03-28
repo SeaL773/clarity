@@ -368,9 +368,41 @@ class _CalendarScreenState extends State<CalendarScreen> {
           // Header
           Padding(
             padding: const EdgeInsets.fromLTRB(22, 18, 22, 4),
-            child: Text('Calendar',
-                style: theme.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w700, letterSpacing: -0.3)),
+            child: Row(
+              children: [
+                Text('Calendar',
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.w700, letterSpacing: -0.3)),
+                const Spacer(),
+                if (!isSameDay(_selectedDay, DateTime.now()) || !isSameDay(_focusedDay, DateTime.now()))
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _selectedDay = DateTime.now();
+                        _focusedDay = DateTime.now();
+                      });
+                      _loadTasksForDay(DateTime.now());
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primary.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.today_rounded, size: 14, color: theme.colorScheme.primary),
+                          const SizedBox(width: 4),
+                          Text('Today',
+                              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500,
+                                  color: theme.colorScheme.primary)),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
 
           // Calendar
