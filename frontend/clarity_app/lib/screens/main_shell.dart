@@ -9,11 +9,15 @@ class MainShell extends StatefulWidget {
   const MainShell({super.key});
 
   @override
-  State<MainShell> createState() => _MainShellState();
+  State<MainShell> createState() => MainShellState();
 }
 
-class _MainShellState extends State<MainShell> {
+class MainShellState extends State<MainShell> {
   int _currentIndex = 0;
+
+  void switchToTab(int index) {
+    setState(() => _currentIndex = index);
+  }
 
   final _pages = const [
     HomeScreen(),

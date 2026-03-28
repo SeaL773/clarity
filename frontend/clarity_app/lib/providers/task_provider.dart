@@ -16,6 +16,17 @@ class TaskProvider extends ChangeNotifier {
   bool _isDarkMode = false;
   bool _isTestMode = false;
 
+  // Pending input from external source (e.g. Whisper test)
+  String? _pendingInput;
+  String? get pendingInput => _pendingInput;
+  void setPendingInput(String text) {
+    _pendingInput = text;
+    notifyListeners();
+  }
+  void clearPendingInput() {
+    _pendingInput = null;
+  }
+
   bool get isDarkMode => _isDarkMode;
   bool get isTestMode => _isTestMode;
   SpeechInputMode get speechInputMode => defaultSpeechInputMode;

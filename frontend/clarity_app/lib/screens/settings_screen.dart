@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../providers/task_provider.dart';
 import '../services/api_service.dart';
 import '../services/notification_service.dart';
+import 'main_shell.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -42,19 +43,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
       // Clean up
       await tempFile.delete();
 
-      if (context.mounted) {
+      if (context.mounted && text.isNotEmpty) {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
-        showDialog(
-          context: context,
-          builder: (ctx) => AlertDialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            title: Text('$label Result'),
-            content: Text(text.isEmpty ? '(empty transcription)' : text),
-            actions: [
-              FilledButton(onPressed: () => Navigator.pop(ctx), child: const Text('OK')),
-            ],
-          ),
-        );
+        // Set pending input → provider notifies → home picks it up
+        final provider = context.read<TaskProvider>();
+        provider.setPendingInput(text);
+        // Switch to Home tab
+        final shellState = context.findAncestorStateOfType<MainShellState>();
+        shellState?.switchToTab(0);
       }
     } catch (e) {
       if (context.mounted) {

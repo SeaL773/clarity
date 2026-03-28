@@ -41,6 +41,18 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     final provider = context.watch<TaskProvider>();
     final hasTasks = provider.tasks.isNotEmpty;
 
+    // Process pending input from external source (e.g. Whisper test)
+    if (provider.pendingInput != null) {
+      final text = provider.pendingInput!;
+      provider.clearPendingInput();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() => _inputExpanded = true);
+          provider.processBrainDump(text);
+        }
+      });
+    }
+
     // Show celebration
     if (provider.celebration != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
