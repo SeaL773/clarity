@@ -16,39 +16,13 @@ class TaskCard extends StatelessWidget {
   Color _priorityColor(String? priority) {
     switch (priority) {
       case 'urgent_important':
-        return Colors.red.shade100;
+        return Colors.red.shade200;
       case 'important_not_urgent':
-        return Colors.blue.shade100;
+        return Colors.blue.shade200;
       case 'urgent_not_important':
-        return Colors.orange.shade100;
+        return Colors.orange.shade200;
       default:
-        return Colors.grey.shade100;
-    }
-  }
-
-  IconData _priorityIcon(String? priority) {
-    switch (priority) {
-      case 'urgent_important':
-        return Icons.priority_high_rounded;
-      case 'important_not_urgent':
-        return Icons.schedule_rounded;
-      case 'urgent_not_important':
-        return Icons.flash_on_rounded;
-      default:
-        return Icons.remove_rounded;
-    }
-  }
-
-  String _priorityLabel(String? priority) {
-    switch (priority) {
-      case 'urgent_important':
-        return 'Do First';
-      case 'important_not_urgent':
-        return 'Schedule';
-      case 'urgent_not_important':
-        return 'Quick Task';
-      default:
-        return 'Low Priority';
+        return Colors.grey.shade200;
     }
   }
 
@@ -68,7 +42,7 @@ class TaskCard extends StatelessWidget {
           color: task.completed
               ? theme.colorScheme.outline.withValues(alpha: 0.1)
               : _priorityColor(task.priority),
-          width: 1.5,
+          width: 2,
         ),
         boxShadow: task.completed
             ? []
@@ -115,35 +89,6 @@ class TaskCard extends StatelessWidget {
                     ),
                   )
                 : null,
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (task.estimatedMinutes != null)
-                  Chip(
-                    label: Text('${task.estimatedMinutes}m', style: const TextStyle(fontSize: 11)),
-                    padding: EdgeInsets.zero,
-                    visualDensity: VisualDensity.compact,
-                    backgroundColor: theme.colorScheme.surfaceContainerHighest,
-                  ),
-                const SizedBox(width: 4),
-                if (task.priority != null)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: _priorityColor(task.priority),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(_priorityIcon(task.priority), size: 14),
-                        const SizedBox(width: 4),
-                        Text(_priorityLabel(task.priority), style: const TextStyle(fontSize: 11)),
-                      ],
-                    ),
-                  ),
-              ],
-            ),
           ),
           if (task.subTasks.isNotEmpty)
             Padding(
@@ -177,14 +122,6 @@ class TaskCard extends StatelessWidget {
                             ),
                           ),
                         ),
-                        if (sub.estimatedMinutes != null)
-                          Text(
-                            '${sub.estimatedMinutes}m',
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
-                            ),
-                          ),
                       ],
                     ),
                   );

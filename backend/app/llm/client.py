@@ -25,7 +25,7 @@ KIRO_TOKEN_PATH = Path.home() / ".aws" / "sso" / "cache" / "kiro-auth-token.json
 
 # Kiro API config
 KIRO_ENDPOINT = "https://codewhisperer.us-east-1.amazonaws.com/generateAssistantResponse"
-KIRO_MODEL_ID = "claude-sonnet-4.5"
+KIRO_MODEL_ID = "claude-haiku-4.5"
 KIRO_VERSION = "0.6.18"
 
 
@@ -155,7 +155,7 @@ async def _call_kiro(system_prompt: str, user_message: str, token: str) -> dict:
 
     print(f"[LLM] Calling Kiro API (model: {KIRO_MODEL_ID})...")
 
-    async with httpx.AsyncClient(timeout=60.0) as client:
+    async with httpx.AsyncClient(timeout=120.0) as client:
         response = await client.post(
             KIRO_ENDPOINT,
             headers=headers,

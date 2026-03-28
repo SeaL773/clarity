@@ -94,13 +94,7 @@ class HomeScreen extends StatelessWidget {
                           ),
                         ),
                       ),
-                      if (provider.totalEstimatedHours > 0)
-                        Padding(
-                          padding: const EdgeInsets.only(left: 12),
-                          child: Text('~${provider.totalEstimatedHours.toStringAsFixed(1)}h',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.onSurface.withValues(alpha: 0.5))),
-                        ),
+                      // Time estimate hidden — reduces pressure for ADHD users
                     ],
                   ),
                 ),

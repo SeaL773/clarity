@@ -75,7 +75,19 @@ class TaskProvider extends ChangeNotifier {
         final sub = _tasks[parentIdx].subTasks[subIdx];
         _tasks[parentIdx].subTasks[subIdx] =
             sub.copyWith(completed: !sub.completed);
+
+        // Auto-complete parent when all sub-tasks are done
+        final allSubsDone = _tasks[parentIdx].subTasks.every((s) => s.completed);
+        if (allSubsDone && !_tasks[parentIdx].completed) {
+          _tasks[parentIdx] = _tasks[parentIdx].copyWith(completed: true);
+        }
+        // Un-complete parent if a sub-task is unchecked
+        if (!allSubsDone && _tasks[parentIdx].completed) {
+          _tasks[parentIdx] = _tasks[parentIdx].copyWith(completed: false);
+        }
+
         notifyListeners();
+        _api.saveTasks(todayDate, _tasks).catchError((_) {});
       }
     }
   }
