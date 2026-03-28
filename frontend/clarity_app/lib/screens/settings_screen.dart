@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../providers/task_provider.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -6,6 +9,7 @@ class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final provider = context.watch<TaskProvider>();
 
     return SafeArea(
       child: SingleChildScrollView(
@@ -13,12 +17,28 @@ class SettingsScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Settings',
-                style: theme.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w700, letterSpacing: -0.3)),
+            Text(
+              'Settings',
+              style: theme.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+                letterSpacing: -0.3,
+              ),
+            ),
             const SizedBox(height: 20),
-
-            // About section
+            _SettingsSection(
+              title: 'Mode',
+              children: [
+                _ModeTile(
+                  isTestMode: provider.isTestMode,
+                  onChanged: (value) {
+                    context.read<TaskProvider>().setMode(
+                          value ? AppMode.test : AppMode.user,
+                        );
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
             _SettingsSection(
               title: 'About',
               children: [
@@ -26,24 +46,24 @@ class SettingsScreen extends StatelessWidget {
                   icon: Icons.auto_awesome_rounded,
                   title: 'Clarity',
                   subtitle: 'AI-powered smart todo list',
-                  trailing: Text('v1.0.0',
-                      style: theme.textTheme.labelSmall?.copyWith(
-                          color: theme.colorScheme.onSurface.withValues(alpha: 0.3))),
+                  trailing: Text(
+                    'v1.0.0',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
+                    ),
+                  ),
                 ),
-                _SettingsTile(
+                const _SettingsTile(
                   icon: Icons.favorite_outline_rounded,
                   title: 'Designed for ADHD',
                   subtitle: 'No time pressure, encouraging feedback',
                 ),
               ],
             ),
-
             const SizedBox(height: 16),
-
-            // Features section
             _SettingsSection(
               title: 'How it works',
-              children: [
+              children: const [
                 _SettingsTile(
                   icon: Icons.edit_note_rounded,
                   title: 'Brain Dump',
@@ -52,7 +72,7 @@ class SettingsScreen extends StatelessWidget {
                 _SettingsTile(
                   icon: Icons.psychology_rounded,
                   title: 'AI Pipeline',
-                  subtitle: '3-step: Parse → Prioritize → Organize',
+                  subtitle: '3-step: Parse -> Prioritize -> Organize',
                 ),
                 _SettingsTile(
                   icon: Icons.insights_rounded,
@@ -61,19 +81,21 @@ class SettingsScreen extends StatelessWidget {
                 ),
               ],
             ),
-
             const SizedBox(height: 16),
-
-            // Coming soon
             _SettingsSection(
-              title: 'Coming Soon',
-              children: [
+              title: 'Available now',
+              children: const [
                 _SettingsTile(
                   icon: Icons.calendar_month_rounded,
                   title: 'Calendar View',
-                  subtitle: 'See your tasks on a calendar',
-                  trailing: _ComingSoonBadge(),
+                  subtitle: 'See task counts and open any day detail',
                 ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            _SettingsSection(
+              title: 'Coming Soon',
+              children: [
                 _SettingsTile(
                   icon: Icons.dark_mode_outlined,
                   title: 'Dark Mode',
@@ -88,14 +110,14 @@ class SettingsScreen extends StatelessWidget {
                 ),
               ],
             ),
-
             const SizedBox(height: 24),
             Center(
               child: Text(
-                'Built at AWS Kiro × CS Careers Hackathon\nVirginia Tech · March 2026',
+                'Built at AWS Kiro x CS Careers Hackathon\nVirginia Tech · March 2026',
                 style: theme.textTheme.labelSmall?.copyWith(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.25),
-                    height: 1.5),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.25),
+                  height: 1.5,
+                ),
                 textAlign: TextAlign.center,
               ),
             ),
@@ -106,11 +128,72 @@ class SettingsScreen extends StatelessWidget {
   }
 }
 
+class _ModeTile extends StatelessWidget {
+  const _ModeTile({
+    required this.isTestMode,
+    required this.onChanged,
+  });
+
+  final bool isTestMode;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      child: Row(
+        children: [
+          Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+              color: theme.colorScheme.primary.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(9),
+            ),
+            child: Icon(
+              Icons.science_outlined,
+              size: 18,
+              color: theme.colorScheme.primary.withValues(alpha: 0.6),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Test mode',
+                  style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+                ),
+                Text(
+                  'Backend disabled. Generate local sample tasks instantly.',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.45),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Switch(
+            value: isTestMode,
+            onChanged: onChanged,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _SettingsSection extends StatelessWidget {
+  const _SettingsSection({
+    required this.title,
+    required this.children,
+  });
+
   final String title;
   final List<Widget> children;
-
-  const _SettingsSection({required this.title, required this.children});
 
   @override
   Widget build(BuildContext context) {
@@ -119,10 +202,13 @@ class _SettingsSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title,
-            style: theme.textTheme.labelMedium?.copyWith(
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
-                fontWeight: FontWeight.w600)),
+        Text(
+          title,
+          style: theme.textTheme.labelMedium?.copyWith(
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+            fontWeight: FontWeight.w600,
+          ),
+        ),
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
@@ -145,17 +231,17 @@ class _SettingsSection extends StatelessWidget {
 }
 
 class _SettingsTile extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final Widget? trailing;
-
   const _SettingsTile({
     required this.icon,
     required this.title,
     required this.subtitle,
     this.trailing,
   });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -172,18 +258,27 @@ class _SettingsTile extends StatelessWidget {
               color: theme.colorScheme.primary.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(9),
             ),
-            child: Icon(icon, size: 18, color: theme.colorScheme.primary.withValues(alpha: 0.6)),
+            child: Icon(
+              icon,
+              size: 18,
+              color: theme.colorScheme.primary.withValues(alpha: 0.6),
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title,
-                    style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500)),
-                Text(subtitle,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.4))),
+                Text(
+                  title,
+                  style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+                ),
+                Text(
+                  subtitle,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+                  ),
+                ),
               ],
             ),
           ),
@@ -203,8 +298,14 @@ class _ComingSoonBadge extends StatelessWidget {
         color: Colors.orange.shade50,
         borderRadius: BorderRadius.circular(6),
       ),
-      child: Text('Soon',
-          style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: Colors.orange.shade400)),
+      child: Text(
+        'Soon',
+        style: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w600,
+          color: Colors.orange.shade400,
+        ),
+      ),
     );
   }
 }

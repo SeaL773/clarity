@@ -55,7 +55,9 @@ class _BrainDumpInputState extends State<BrainDumpInput> {
 
   @override
   Widget build(BuildContext context) {
-    final isLoading = context.watch<TaskProvider>().isLoading;
+    final provider = context.watch<TaskProvider>();
+    final isLoading = provider.isLoading;
+    final isTestMode = provider.isTestMode;
     final theme = Theme.of(context);
 
     return Column(
@@ -76,7 +78,9 @@ class _BrainDumpInputState extends State<BrainDumpInput> {
                 onTap: () => setState(() => _expanded = true),
                 style: theme.textTheme.bodyMedium?.copyWith(height: 1.5),
                 decoration: InputDecoration(
-                  hintText: 'What do you need to do?',
+                  hintText: isTestMode
+                      ? 'Input text to generate local demo tasks'
+                      : 'What do you need to do?',
                   hintStyle: TextStyle(
                     color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
                   ),
@@ -117,7 +121,12 @@ class _BrainDumpInputState extends State<BrainDumpInput> {
                                 child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                               )
                             : const Icon(Icons.auto_awesome_rounded, size: 16),
-                        label: Text(isLoading ? 'Thinking...' : 'Clarity',
+                        label: Text(
+                            isLoading
+                                ? 'Thinking...'
+                                : isTestMode
+                                    ? 'Generate Demo'
+                                    : 'Clarity',
                             style: const TextStyle(fontSize: 13)),
                         style: FilledButton.styleFrom(
                           padding: const EdgeInsets.symmetric(horizontal: 18),

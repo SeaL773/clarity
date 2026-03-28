@@ -64,7 +64,18 @@ class RecapScreen extends StatelessWidget {
                                 style: theme.textTheme.bodySmall?.copyWith(
                                     color: theme.colorScheme.onSurface.withValues(alpha: 0.2))),
                             const SizedBox(height: 20),
-                            if (provider.tasks.isNotEmpty)
+                            if (provider.isTestMode)
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: Text(
+                                  'Test mode recap is generated locally without backend calls.',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: theme.colorScheme.onSurface.withValues(alpha: 0.35),
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            if (provider.tasks.isNotEmpty || provider.isTestMode)
                               FilledButton.icon(
                                 onPressed: provider.getDailySummary,
                                 icon: const Icon(Icons.auto_awesome_rounded, size: 16),
