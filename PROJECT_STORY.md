@@ -16,7 +16,7 @@ Key features: calendar with urgency progress bars, Google Calendar-style timelin
 
 ## Challenges
 
-Our Kiro account got rate-limited mid-development from heavy API testing. Thanks to our multi-provider fallback architecture (Anthropic → Kiro → Bedrock → OpenAI), we pivoted to direct Anthropic API in under 5 minutes with zero downtime. Also fought Android emulator memory issues — 32GB server with only 1.7GB free after running Android Studio + Kiro + backend simultaneously.
+Running Android Studio, Kiro IDE, an Android emulator, and our backend simultaneously pushed our 32GB server to its limits — at one point only 1.7GB free. We also iterated heavily on prompt engineering to get consistent JSON output from the LLM without markdown wrapping or extra explanation.
 
 ## What We Learned
 
