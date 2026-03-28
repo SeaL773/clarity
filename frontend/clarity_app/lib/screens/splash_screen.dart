@@ -72,21 +72,13 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Icon — sparkle with checkmark
-                      Container(
-                        width: 88,
-                        height: 88,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(24),
-                        ),
-                        child: const Icon(
-                          Icons.auto_awesome_rounded,
-                          size: 44,
-                          color: Colors.white,
-                        ),
+                      // Icon — clean, no background
+                      const Icon(
+                        Icons.auto_awesome_rounded,
+                        size: 56,
+                        color: Colors.white,
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 16),
                       const Text(
                         'Clarity',
                         style: TextStyle(
