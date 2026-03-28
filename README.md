@@ -9,7 +9,7 @@
 [![Built with Flutter](https://img.shields.io/badge/Frontend-Flutter-02569B?logo=flutter)](https://flutter.dev)
 [![Powered by FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688?logo=fastapi)](https://fastapi.tiangolo.com)
 [![AI by Claude](https://img.shields.io/badge/AI-Claude_Haiku_4.5-D97757?logo=anthropic)](https://anthropic.com)
-[![Built with Kiro](https://img.shields.io/badge/Built_with-Kiro_IDE-FF9900?logo=amazonaws&logoColor=white)](https://kiro.dev)
+[![Built with Kiro](https://img.shields.io/badge/IDE-Kiro_by_AWS-FF9900?style=flat&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiPjxwYXRoIGQ9Ik0xMiAyQzEyLjUgNi41IDE3LjUgMTEuNSAyMiAxMkMxNy41IDEyLjUgMTIuNSAxNy41IDEyIDIyQzExLjUgMTcuNSA2LjUgMTIuNSAyIDEyQzYuNSAxMS41IDExLjUgNi41IDEyIDJaIi8+PC9zdmc+&logoColor=white)](https://kiro.dev)
 [![Virginia-Tech CS](https://img.shields.io/badge/Virginia_Tech-CS-861F41)](https://github.com/Jerry-NotesHub/Virginia-Tech-Shields)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
@@ -57,6 +57,13 @@ No time pressure. No guilt. Just clarity.
 | **Summarize** | `POST /api/summarize` | Generate encouraging daily recap, suggest tomorrow's focus |
 
 Each step has its own **dedicated prompt** designed for the task — not one generic prompt. The parse and plan steps are chained via `POST /api/process` for a seamless user experience.
+
+### Backend Security & Reliability
+- **Rate limiting** — 20 requests per minute per client
+- **Input validation** — Date parameters validated (YYYY-MM-DD)
+- **Atomic transactions** — SQLite writes wrapped in BEGIN/COMMIT/ROLLBACK
+- **Generic error messages** — No internal details leaked to clients
+- **Multi-provider fallback** — Anthropic → Kiro → Bedrock → OpenAI
 
 ## Tech Stack
 
@@ -176,26 +183,30 @@ clarity/
 │       └── summarize.txt        # Recap prompt
 │
 ├── frontend/clarity_app/
+│   ├── assets/
+│   │   └── clarity_icon.svg     # Branded app icon (sparkle + checkmark)
 │   └── lib/
 │       ├── main.dart            # App entry + light/dark theming
-│       ├── models/task.dart     # Immutable data models with dueTime
-│       ├── providers/           # State management + test mode
+│       ├── models/
+│       │   └── task.dart        # Immutable data models with dueTime
+│       ├── providers/
+│       │   └── task_provider    # State management, test mode, celebrations
 │       ├── screens/
-│       │   ├── splash_screen    # Branded launch screen
-│       │   ├── main_shell       # Tab navigation with frosted glass bar
-│       │   ├── home_screen      # Brain dump + task list
-│       │   ├── calendar_screen  # Monthly view + timeline
-│       │   ├── calendar_day     # Full day detail view
-│       │   ├── recap_screen     # Daily AI summary
-│       │   └── settings_screen  # Dark mode, reminders, dev mode
+│       │   ├── splash_screen    # Branded gradient launch screen
+│       │   ├── main_shell       # 4-tab navigation with frosted glass bar
+│       │   ├── home_screen      # Brain dump + task list + celebrations
+│       │   ├── calendar_screen  # Monthly view + urgency bars + timeline
+│       │   ├── calendar_day     # Full day detail view (read-only history)
+│       │   ├── recap_screen     # AI summary + regenerate button
+│       │   └── settings_screen  # Dark mode, reminders, hidden dev mode
 │       ├── services/
-│       │   ├── api_service      # Platform-aware HTTP client
-│       │   ├── speech_service   # Voice input with error handling
-│       │   └── notification     # Local push notifications
+│       │   ├── api_service      # Platform-aware HTTP client (Android/Web/Desktop)
+│       │   ├── speech_service   # Voice input with error callbacks
+│       │   └── notification     # Local push notifications with custom icon
 │       └── widgets/
 │           ├── brain_dump_input # Collapsible text + voice input
-│           ├── task_card        # Priority-colored task with sub-tasks
-│           └── summary_card     # Recap with progress ring
+│           ├── task_card        # Priority-colored cards with sub-tasks
+│           └── summary_card     # Recap with progress ring + encouragement
 │
 ├── README.md
 └── TECH_DOC.md                  # Detailed technical documentation
