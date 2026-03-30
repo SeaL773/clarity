@@ -13,7 +13,17 @@
 [![Virginia-Tech CS](https://img.shields.io/badge/Virginia_Tech-CS-861F41)](https://github.com/Jerry-NotesHub/Virginia-Tech-Shields)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
+<img src="cover.png" alt="Clarity Cover" width="600"/>
+
 </div>
+
+---
+
+## Demo Video
+
+[![Watch the Demo](https://img.youtube.com/vi/-MrSHfICSuc/maxresdefault.jpg)](https://www.youtube.com/watch?v=-MrSHfICSuc)
+
+▶️ **[Watch on YouTube](https://www.youtube.com/watch?v=-MrSHfICSuc)**
 
 ---
 
@@ -218,8 +228,7 @@ clarity/
 │           ├── task_card        # Priority-colored cards with sub-tasks
 │           └── summary_card     # Recap with progress ring + encouragement
 │
-├── README.md
-└── TECH_DOC.md                  # Detailed technical documentation
+└── README.md
 ```
 
 ## Social Good
