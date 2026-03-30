@@ -13,6 +13,8 @@
 [![Virginia-Tech CS](https://img.shields.io/badge/Virginia_Tech-CS-861F41)](https://github.com/Jerry-NotesHub/Virginia-Tech-Shields)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
+### 🏆 3rd Place — [AWS Kiro × CS Careers Hackathon at Virginia Tech](https://aws-kiro-cs-careers-vt.devpost.com/)
+
 <img src="cover.png" alt="Clarity Cover" width="600"/>
 
 </div>
@@ -245,9 +247,22 @@ Clarity is designed with **cognitive accessibility** as a core principle:
 
 > *366M+ people worldwide are affected by ADHD. Executive dysfunction isn't laziness — it's a neurological difficulty with task initiation and planning. Clarity helps bridge that gap.*
 
-## Team
+## Hackathon
 
-Built at the **AWS Kiro × CS Careers Hackathon** at Virginia Tech — March 28, 2026.
+**🏆 3rd Place Overall** at the [AWS Kiro × CS Careers Hackathon at Virginia Tech](https://aws-kiro-cs-careers-vt.devpost.com/) — March 28, 2026.
+
+200 students, 10 hours, judged on a 60-point rubric across 6 categories:
+
+| Category | Points |
+|----------|--------|
+| Social Good | 12 |
+| AI Integration | 12 |
+| Innovation | 10 |
+| Impact & Storytelling | 10 |
+| Technical Execution | 8 |
+| Design & UI/UX | 8 |
+
+Prize: $320 Kiro Credits
 
 ## License
 
