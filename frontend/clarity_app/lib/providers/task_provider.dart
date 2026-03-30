@@ -214,8 +214,16 @@ class TaskProvider extends ChangeNotifier {
         });
       }
 
-      // Append new tasks to existing ones instead of replacing
-      _tasks.addAll(newTasks);
+      // Append new tasks, skipping duplicates (by normalized title match)
+      final existingTitles = _tasks.map((t) => t.title.trim().toLowerCase()).toSet();
+      for (final task in newTasks) {
+        final normalizedTitle = task.title.trim().toLowerCase();
+        if (!existingTitles.contains(normalizedTitle)) {
+          _tasks.add(task);
+          existingTitles.add(normalizedTitle);
+        }
+        // If duplicate: skip — keep existing task (preserves completed state)
+      }
 
       // Sort all tasks by priority (high→low), then by suggested order
       _sortTasks();
