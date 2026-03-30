@@ -67,6 +67,9 @@ async def rate_limit_middleware(request: Request, call_next):
     if request.url.path.startswith("/api/") and request.method == "POST":
         client_ip = request.client.host if request.client else "unknown"
         now = time.time()
+        # Prevent unbounded memory growth from unique IPs
+        if len(_rate_limit) > 10000:
+            _rate_limit.clear()
         timestamps = _rate_limit.get(client_ip, [])
         timestamps = [t for t in timestamps if now - t < RATE_LIMIT_WINDOW]
         if len(timestamps) >= RATE_LIMIT_MAX:
@@ -185,24 +188,28 @@ async def api_update_task(task_id: str, task: Task):
 @app.post("/api/process")
 async def api_process(request: ParseRequest):
     """Full pipeline: parse brain dump → plan tasks → return organized list."""
-    # Step 1: Parse
-    parsed = await parse_brain_dump(request)
+    try:
+        # Step 1: Parse
+        parsed = await parse_brain_dump(request)
 
-    # Step 2: Plan
-    plan_req = PlanRequest(tasks=parsed.tasks)
-    planned = await plan_tasks(plan_req)
+        # Step 2: Plan
+        plan_req = PlanRequest(tasks=parsed.tasks)
+        planned = await plan_tasks(plan_req)
 
-    # Step 3: Save to DB
-    today = date.today().isoformat()
-    await save_tasks(today, [t.model_dump() for t in planned.planned_tasks])
+        # Step 3: Save to DB
+        today = date.today().isoformat()
+        await save_tasks(today, [t.model_dump() for t in planned.planned_tasks])
 
-    return {
-        "date": today,
-        "tasks": [t.model_dump() for t in planned.planned_tasks],
-        "suggested_order": planned.suggested_order,
-        "total_estimated_hours": planned.total_estimated_hours,
-        "insights": parsed.insights,
-    }
+        return {
+            "date": today,
+            "tasks": [t.model_dump() for t in planned.planned_tasks],
+            "suggested_order": planned.suggested_order,
+            "total_estimated_hours": planned.total_estimated_hours,
+            "insights": parsed.insights,
+        }
+    except Exception as e:
+        print(f"[API] Process error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to process your input. Please try again.")
 
 
 if __name__ == "__main__":

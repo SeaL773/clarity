@@ -24,6 +24,11 @@ async def transcribe_audio(file: UploadFile) -> str:
     if not content:
         raise ValueError("Uploaded audio file is empty.")
 
+    # Limit file size to 10MB to prevent abuse
+    max_size = 10 * 1024 * 1024
+    if len(content) > max_size:
+        raise ValueError(f"Audio file too large ({len(content) // 1024 // 1024}MB). Max 10MB.")
+
     client = AsyncOpenAI(api_key=api_key)
 
     with NamedTemporaryFile(delete=False, suffix=suffix) as temp_file:

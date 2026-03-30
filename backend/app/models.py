@@ -29,8 +29,8 @@ class Task(BaseModel):
 # --- Parse ---
 
 class ParseRequest(BaseModel):
-    text: str
-    context: Optional[str] = None  # e.g. "I'm a college student"
+    text: str = Field(..., max_length=10000)  # prevent oversized LLM calls
+    context: Optional[str] = Field(None, max_length=500)
 
 
 class ParseResponse(BaseModel):
